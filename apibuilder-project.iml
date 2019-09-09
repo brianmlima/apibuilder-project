@@ -8,6 +8,7 @@
     <orderEntry type="library" scope="PROVIDED" name="addressable (v2.7.0, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="bundler (v2.0.2, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="faraday (v0.15.4, rbenv: 2.6.4) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="git (v1.5.0, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="multipart-post (v2.1.1, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="octokit (v4.14.0, rbenv: 2.6.4) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="public_suffix (v4.0.1, rbenv: 2.6.4) [gem]" level="application" />

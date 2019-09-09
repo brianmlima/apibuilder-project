@@ -15,7 +15,8 @@ module ApibuilderProject
                 :github_token,
                 :project_name,
                 :apibuilder_profile,
-                :apibuilder_token
+                :apibuilder_token,
+                :debug
 
     OptionSpec = Struct.new(:short, :long, :type, :description)
     SwitchSpec = Struct.new(:short, :long, :description)
@@ -40,10 +41,13 @@ module ApibuilderProject
       path_opt = OptionSpec.new("-d", "--destination DESTINATION", String, "(Required) the destination directory where the template will be rendered")
       force_opt = SwitchSpec.new("-f", "--force", "if set the destination directory will be created if it does not exist and existing files will be overwritten")
       clean_opt = SwitchSpec.new("-c", "--clean", "if set and the project destination directory exists all contents will be deleted before continuing")
+      debug_opt = SwitchSpec.new("--debug", "", "if set and the project destination directory exists all contents will be deleted before continuing")
       show_scary_paths_opt = SwitchSpec.new("-s", "--scary-paths", "if set prints scary paths and exits")
 
       @force = false
       @clean = false
+      @debug = false
+
 
       optionParser = OptionParser.new do |opts|
         opts.banner = "Usage: #{File.basename(script_path)} [options]"
@@ -64,6 +68,9 @@ module ApibuilderProject
           @github_token_file = v
         end
 
+        opts.on(debug_opt.short, debug_opt.long, debug_opt.description) do |v|
+          @debug = true
+        end
 
         opts.on(force_opt.short, force_opt.long, force_opt.description) do |v|
           @force = true
@@ -94,7 +101,6 @@ module ApibuilderProject
       logAndFail(optionParser, reqArgMessage(path_opt)) if @target_directory == nil
       logAndFail(optionParser, reqArgMessage(github_token_file_opt)) if @github_token_file == nil
 
-
       @project_name = "#{@organization}.api.#{@application}"
 
       @target_directory = File.absolute_path(File.expand_path(@target_directory))
@@ -107,9 +113,6 @@ module ApibuilderProject
 
       @apibuilder_profile = ApibuilderCli::Util.read_non_empty_string(ENV['PROFILE'])
       @apibuilder_token = ApibuilderCli::Util.read_non_empty_string(ENV['APIBUILDER_TOKEN']) || ApibuilderCli::Util.read_non_empty_string(ENV['APIDOC_TOKEN'])
-      # :limit = ApibuilderCli::Util.read_non_empty_integer(ENV['LIMIT']),
-      # :offset = ApibuilderCli::Util.read_non_empty_integer(ENV['OFFSET']),
-      # :has_version = ApibuilderCli::Util.read_non_empty_string(ENV['HAS_VERSION'])
 
     end
   end

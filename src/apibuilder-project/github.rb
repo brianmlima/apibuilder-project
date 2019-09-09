@@ -3,7 +3,7 @@ require 'octokit'
 module ApibuilderProject
 
   class GithubProject
-    attr_reader :client, :access_token, :git_user, :project_name, :repo_exists
+    attr_reader :client, :access_token, :git_user, :project_name, :repo_exists, :remote
 
     def initialize(access_token:, project_name:)
       @project_name = project_name
@@ -12,6 +12,7 @@ module ApibuilderProject
       @git_user = @client.user
       @repo = Octokit::Repository.new(:user => @git_user.login, :repo => @project_name)
       @repo_exists = @client.repository?(@repo)
+      @remote = "https://github.com/#{@git_user.login}/#{@project_name}.git"
     end
 
     # Create a repository for a user or organization

@@ -8,7 +8,9 @@ require 'bundler'
 require 'json'
 # Bundler.configure
 gemfile(true) do
+  source "https://rubygems.org"
   gem "octokit", "~> 4.0"
+  gem 'git', '~> 1.5'
 end
 
 load File.join(File.dirname(__FILE__), '../src/apibuilder-project.rb')
@@ -19,18 +21,15 @@ private def logAndFail(message)
 end
 
 appConfig = ApibuilderProject::AppConfig.new(ARGV, __FILE__)
+
+debug = appConfig.debug
+
 apibuilderClient = ApibuilderCli::Config.client_from_profile(:profile => appConfig.apibuilder_profile, :token => appConfig.apibuilder_token)
 github = ApibuilderProject::GithubProject.new(:access_token => appConfig.github_token, :project_name => appConfig.project_name)
 
-# githubClient = Octokit::Client.new(:access_token => appConfig.github_token)
-# gitUser = githubClient.user
-# puts gitUser.inspect
-#
-# username = gitUser.inspect
-#
-# exit
-
-# repo = Octokit::Repository.new(:user => username, :repo => appConfig.project_name)
+#############
+# Check to make sure the app and repo does not already exist and make sure the organization exists.
+#############
 
 
 if github.repo_exists
@@ -38,34 +37,36 @@ if github.repo_exists
   exit false
 end
 
-
-puts "organization=#{appConfig.organization}"
-puts "application=#{appConfig.application}"
-puts "version=#{appConfig.version}"
-puts "target_directory=#{appConfig.target_directory}"
-puts "force=#{appConfig.force}"
-puts "clean=#{appConfig.clean}"
-puts "project_base_dir=#{appConfig.project_base_dir}"
-
-ScaryPaths::Checks.failOnScaryPath(appConfig.target_directory, appConfig.project_base_dir)
-
-v = apibuilderClient.organizations.get
-
-remoteOrg = v.find {|org| org.name == appConfig.organization}
+remoteOrg = apibuilderClient.organizations.get.find {|org| org.name == appConfig.organization}
+remoteApp = apibuilderClient.applications.get(remoteOrg.key).find {|app| app.name == appConfig.application}
 
 # org_exists = v.any? {|org| org.name == appConfig.organization}
 if remoteOrg
-  puts "Confirmed Organization #{appConfig.organization} exists"
+  puts "Confirmed Organization #{appConfig.organization} exists" if debug
+else
+  puts "Apinuilder Organization #{appConfig.organization} does not exist. Cowardly failing."
+  exit false
 end
-
-v = apibuilderClient.applications.get(remoteOrg.key)
-remoteApp = v.find {|app| app.name == appConfig.application}
 
 if remoteApp
-  puts "WARNING Application #{appConfig.application} already exists"
+  puts "WARNING ApiBuilder Application #{appConfig.application} already exists in organization #{appConfig.organization}. Cowardly failing"
+  exit false
 else
-  puts "Confirmed Application #{appConfig.application} does not exist"
+  puts "Confirmed Application #{appConfig.application} does not exist in organization #{appConfig.organization}" if debug
 end
+
+
+if appConfig.debug
+  puts "organization=#{appConfig.organization}"
+  puts "application=#{appConfig.application}"
+  puts "version=#{appConfig.version}"
+  puts "target_directory=#{appConfig.target_directory}"
+  puts "force=#{appConfig.force}"
+  puts "clean=#{appConfig.clean}"
+  puts "project_base_dir=#{appConfig.project_base_dir}"
+end
+
+ScaryPaths::Checks.failOnScaryPath(appConfig.target_directory, appConfig.project_base_dir)
 
 
 # if the target dir does not exist create it if force is set otherwise exit
@@ -116,6 +117,25 @@ projectConfig = ApibuilderProject::ProjectConfig.new(
 )
 
 ApibuilderProject::StaticFiles.copyFiles(:project_base_dir => appConfig.project_base_dir)
+
+github.create
+
+gitProject = ApibuilderProject::GitProject.new(
+    organization: appConfig.organization,
+    application: appConfig.application,
+    version: appConfig.version,
+    project_base_dir: appConfig.project_base_dir,
+    git_remote: github.remote
+)
+
+application_form = Io::Apibuilder::Api::V0::Models::ApplicationForm.new(
+    :name => appConfig.application,
+    :key => appConfig.application,
+    :description => "",
+    :visibility => Io::Apibuilder::Api::V0::Models::Visibility.organization
+)
+
+apibuilderClient.applications.post(remoteOrg.key, application_form)
 
 
 # puts "----------------"

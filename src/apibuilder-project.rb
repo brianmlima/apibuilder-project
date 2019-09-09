@@ -17,6 +17,7 @@ load File.join(lib_dir, 'apibuilder_json.rb')
 load File.join(lib_dir, 'github.rb')
 load File.join(lib_dir, 'project_config.rb')
 load File.join(lib_dir, 'static_files.rb')
+load File.join(lib_dir, 'git.rb')
 
 
 load File.join(apibuilder_cli_dir, 'apicollective_apibuilder_api_v0_client.rb')
