@@ -24,35 +24,39 @@ appConfig = ApibuilderProject::AppConfig.new(ARGV, __FILE__)
 
 debug = appConfig.debug
 
-apibuilderClient = ApibuilderCli::Config.client_from_profile(:profile => appConfig.apibuilder_profile, :token => appConfig.apibuilder_token)
-github = ApibuilderProject::GithubProject.new(:access_token => appConfig.github_token, :project_name => appConfig.project_name)
+if !appConfig.local_only
+
+  apibuilderClient = ApibuilderCli::Config.client_from_profile(:profile => appConfig.apibuilder_profile, :token => appConfig.apibuilder_token)
+  github = ApibuilderProject::GithubProject.new(:access_token => appConfig.github_token, :project_name => appConfig.project_name)
 
 #############
 # Check to make sure the app and repo does not already exist and make sure the organization exists.
 #############
 
 
-if github.repo_exists
-  puts "The derrived project name #{appConfig.project_name} already exists, perhaps you should choose another application name. Cowardly refusing to continue"
-  exit false
-end
+  if github.repo_exists
+    puts "The derrived project name #{appConfig.project_name} already exists, perhaps you should choose another application name. Cowardly refusing to continue"
+    exit false
+  end
 
-remoteOrg = apibuilderClient.organizations.get.find {|org| org.name == appConfig.organization}
-remoteApp = apibuilderClient.applications.get(remoteOrg.key).find {|app| app.name == appConfig.application}
+  remoteOrg = apibuilderClient.organizations.get.find {|org| org.name == appConfig.organization}
+  remoteApp = apibuilderClient.applications.get(remoteOrg.key).find {|app| app.name == appConfig.application}
 
 # org_exists = v.any? {|org| org.name == appConfig.organization}
-if remoteOrg
-  puts "Confirmed Organization #{appConfig.organization} exists" if debug
-else
-  puts "Apinuilder Organization #{appConfig.organization} does not exist. Cowardly failing."
-  exit false
-end
+  if remoteOrg
+    puts "Confirmed Organization #{appConfig.organization} exists" if debug
+  else
+    puts "Apinuilder Organization #{appConfig.organization} does not exist. Cowardly failing."
+    exit false
+  end
 
-if remoteApp
-  puts "WARNING ApiBuilder Application #{appConfig.application} already exists in organization #{appConfig.organization}. Cowardly failing"
-  exit false
-else
-  puts "Confirmed Application #{appConfig.application} does not exist in organization #{appConfig.organization}" if debug
+  if remoteApp
+    puts "WARNING ApiBuilder Application #{appConfig.application} already exists in organization #{appConfig.organization}. Cowardly failing"
+    exit false
+  else
+    puts "Confirmed Application #{appConfig.application} does not exist in organization #{appConfig.organization}" if debug
+  end
+
 end
 
 
@@ -66,7 +70,7 @@ if appConfig.debug
   puts "project_base_dir=#{appConfig.project_base_dir}"
 end
 
-ScaryPaths::Checks.failOnScaryPath(appConfig.target_directory, appConfig.project_base_dir)
+ScaryPaths::PathChecks.failOnScaryPath(appConfig.target_directory, appConfig.project_base_dir)
 
 
 # if the target dir does not exist create it if force is set otherwise exit
@@ -93,7 +97,7 @@ else
   end
 end
 
-generatorConfig = ApibuilderProject::GeneratorConfig.new(
+ApibuilderProject::GeneratorConfig.write(
     script_name: __FILE__,
     organization: appConfig.organization,
     application: appConfig.application,
@@ -103,40 +107,56 @@ generatorConfig = ApibuilderProject::GeneratorConfig.new(
     project_base_dir: appConfig.project_base_dir
 )
 
-apiJon = ApibuilderProject::ApiJson.new(
+ApibuilderProject::ApiJson.write(
     application: appConfig.application,
     project_base_dir: appConfig.project_base_dir
 )
 
 
-projectConfig = ApibuilderProject::ProjectConfig.new(
+ApibuilderProject::ProjectConfig.write(
     organization: appConfig.organization,
     application: appConfig.application,
     version: appConfig.version,
     project_base_dir: appConfig.project_base_dir
 )
+
+ApibuilderProject::GitIgnore.write(
+    :project_base_dir => appConfig.project_base_dir,
+    :lines => ApibuilderProject::GitIgnore.default_lines
+)
+
+ApibuilderProject::ReadMe.write(
+    organization: appConfig.organization,
+    application: appConfig.application,
+    version: appConfig.version,
+    project_base_dir: appConfig.project_base_dir
+)
+
 
 ApibuilderProject::StaticFiles.copyFiles(:project_base_dir => appConfig.project_base_dir)
 
-github.create
 
-gitProject = ApibuilderProject::GitProject.new(
-    organization: appConfig.organization,
-    application: appConfig.application,
-    version: appConfig.version,
-    project_base_dir: appConfig.project_base_dir,
-    git_remote: github.remote
-)
+if !appConfig.local_only
 
-application_form = Io::Apibuilder::Api::V0::Models::ApplicationForm.new(
-    :name => appConfig.application,
-    :key => appConfig.application,
-    :description => "",
-    :visibility => Io::Apibuilder::Api::V0::Models::Visibility.organization
-)
+  github.create
 
-apibuilderClient.applications.post(remoteOrg.key, application_form)
+  ApibuilderProject::GitProject.init(
+      organization: appConfig.organization,
+      application: appConfig.application,
+      version: appConfig.version,
+      project_base_dir: appConfig.project_base_dir,
+      git_remote: github.remote
+  )
 
+  application_form = Io::Apibuilder::Api::V0::Models::ApplicationForm.new(
+      :name => appConfig.application,
+      :key => appConfig.application,
+      :description => "",
+      :visibility => Io::Apibuilder::Api::V0::Models::Visibility.organization
+  )
+
+  apibuilderClient.applications.post(remoteOrg.key, application_form)
+end
 
 # puts "----------------"
 # puts githubClient.user.login

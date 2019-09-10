@@ -1,6 +1,6 @@
 module ScaryPaths
 
-  Paths = [
+  ScaryPaths = [
       /^\/$/,
       /^\/etc$/,
       /^\/root$/,
@@ -11,14 +11,14 @@ module ScaryPaths
   ]
 
 
-  class Checks
-    def Checks.failOnScaryPath(*paths)
+  class PathChecks
+    def PathChecks.failOnScaryPath(*paths)
       paths.each do |path|
-        scaryPath = Paths.any? {|pattern| pattern.match?(path)}
+        scaryPath = ScaryPaths.any? {|pattern| pattern.match?(path)}
         if scaryPath
           puts "Cowardly refusing to operate on the scary path of #{path}"
           puts "Scary paths are as follows"
-          Paths.each {|pattern| puts pattern.source}
+          ScaryPaths.each {|pattern| puts pattern.source}
           exit false
         end
       end

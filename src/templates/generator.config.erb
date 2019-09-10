@@ -1,0 +1,10 @@
+# Generated with <%= script_name %> at <%= Time.now.strftime("%d/%m/%Y %H:%M:%S") %>
+settings:
+  code.create.directories: true
+code:
+  <%= organization %>:
+    <%= application %>:
+      version: <%= version %>
+      generators:
+        openapi:
+          target: src/<%= application %>

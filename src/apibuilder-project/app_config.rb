@@ -16,7 +16,8 @@ module ApibuilderProject
                 :project_name,
                 :apibuilder_profile,
                 :apibuilder_token,
-                :debug
+                :debug,
+                :local_only
 
     OptionSpec = Struct.new(:short, :long, :type, :description)
     SwitchSpec = Struct.new(:short, :long, :description)
@@ -43,10 +44,13 @@ module ApibuilderProject
       clean_opt = SwitchSpec.new("-c", "--clean", "if set and the project destination directory exists all contents will be deleted before continuing")
       debug_opt = SwitchSpec.new("--debug", "", "if set and the project destination directory exists all contents will be deleted before continuing")
       show_scary_paths_opt = SwitchSpec.new("-s", "--scary-paths", "if set prints scary paths and exits")
+      local_only_opt = SwitchSpec.new("-L", "--local-only", "if set I will not check apibuilder.io or github to check for existing conflicting projects. I will also not create a new apibuilder porject or github repository")
+
 
       @force = false
       @clean = false
       @debug = false
+      @local_only = false
 
 
       optionParser = OptionParser.new do |opts|
@@ -77,6 +81,10 @@ module ApibuilderProject
         end
         opts.on(clean_opt.short, clean_opt.long, clean_opt.description) do |v|
           @clean = true
+        end
+
+        opts.on(local_only_opt.short, local_only_opt.long, local_only_opt.description) do |v|
+          @local_only = true
         end
         opts.on("-h", "--help", "Prints this help") do
           puts opts
