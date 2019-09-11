@@ -34,7 +34,7 @@ module Io
 
           attr_reader :url
 
-          def initialize(url, opts={})
+          def initialize(url, opts = {})
             @url = HttpClient::Preconditions.assert_class('url', url, String)
             @base_url = URI(url)
             @authorization = HttpClient::Preconditions.assert_class_or_nil('authorization', opts.delete(:authorization), HttpClient::Authorization)
@@ -46,11 +46,11 @@ module Io
           end
 
           # Creates an instance of the client using the base url specified in the API spec.
-          def Client.at_base_url(opts={})
+          def Client.at_base_url(opts = {})
             Client.new(Constants::BASE_URL, opts)
           end
 
-          def request(path=nil)
+          def request(path = nil)
             HttpClient::Preconditions.assert_class_or_nil('path', path, String)
             request = HttpClient::Request.new(@http_handler, @base_url, path.to_s).with_header('User-Agent', Constants::USER_AGENT).with_header('X-Apidoc-Version', Constants::VERSION).with_header('X-Apidoc-Version-Major', Constants::VERSION_MAJOR)
 
@@ -164,16 +164,16 @@ module Io
 
             # Returns the versions assocoated with the specified application. The latest
             # version is the first result returned.
-            def get_metadata_and_versions_by_application_key(org_key, application_key, incoming={})
+            def get_metadata_and_versions_by_application_key(org_key, application_key, incoming = {})
               HttpClient::Preconditions.assert_class('org_key', org_key, String)
               HttpClient::Preconditions.assert_class('application_key', application_key, String)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/#{CGI.escape(org_key)}/metadata/#{CGI.escape(application_key)}/versions").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::ApplicationMetadataVersion.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::ApplicationMetadataVersion.new(x)}
             end
 
             # Returns the latest version number as a string
@@ -185,21 +185,21 @@ module Io
             end
 
             # Search all applications. Results are always paginated.
-            def get(org_key, incoming={})
+            def get(org_key, incoming = {})
               HttpClient::Preconditions.assert_class('org_key', org_key, String)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :name => (x = opts.delete(:name); x.nil? ? nil : HttpClient::Preconditions.assert_class('name', x, String)),
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :key => (x = opts.delete(:key); x.nil? ? nil : HttpClient::Preconditions.assert_class('key', x, String)),
-                :has_version => (x = opts.delete(:has_version); x.nil? ? nil : HttpClient::Preconditions.assert_boolean('has_version', x)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer),
-                :sort_by => (x = opts.delete(:sort_by); x.nil? ? nil : (x = x; x.is_a?(::Io::Apibuilder::Api::V0::Models::AppSortBy) ? x : ::Io::Apibuilder::Api::V0::Models::AppSortBy.apply(x)).value),
-                :order => (x = opts.delete(:order); x.nil? ? nil : (x = x; x.is_a?(::Io::Apibuilder::Api::V0::Models::SortOrder) ? x : ::Io::Apibuilder::Api::V0::Models::SortOrder.apply(x)).value)
-              }.delete_if { |k, v| v.nil? }
+                  :name => (x = opts.delete(:name); x.nil? ? nil : HttpClient::Preconditions.assert_class('name', x, String)),
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :key => (x = opts.delete(:key); x.nil? ? nil : HttpClient::Preconditions.assert_class('key', x, String)),
+                  :has_version => (x = opts.delete(:has_version); x.nil? ? nil : HttpClient::Preconditions.assert_boolean('has_version', x)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer),
+                  :sort_by => (x = opts.delete(:sort_by); x.nil? ? nil : (x = x; x.is_a?(::Io::Apibuilder::Api::V0::Models::AppSortBy) ? x : ::Io::Apibuilder::Api::V0::Models::AppSortBy.apply(x)).value),
+                  :order => (x = opts.delete(:order); x.nil? ? nil : (x = x; x.is_a?(::Io::Apibuilder::Api::V0::Models::SortOrder) ? x : ::Io::Apibuilder::Api::V0::Models::SortOrder.apply(x)).value)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/#{CGI.escape(org_key)}").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Application.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Application.new(x)}
             end
 
             # Create an application.
@@ -245,16 +245,16 @@ module Io
             end
 
             # Search all attributes. Results are always paginated.
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :name => (x = opts.delete(:name); x.nil? ? nil : HttpClient::Preconditions.assert_class('name', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :name => (x = opts.delete(:name); x.nil? ? nil : HttpClient::Preconditions.assert_class('name', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/attributes").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Attribute.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Attribute.new(x)}
             end
 
             # Returns the attribute with this name.
@@ -301,19 +301,19 @@ module Io
               @client = HttpClient::Preconditions.assert_class('client', client, ::Io::Apibuilder::Api::V0::Client)
             end
 
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :org_key => (x = opts.delete(:org_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_key', x, String)),
-                :application_key => (x = opts.delete(:application_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('application_key', x, String)),
-                :from => (x = opts.delete(:from); x.nil? ? nil : HttpClient::Preconditions.assert_class('from', x, String)),
-                :to => (x = opts.delete(:to); x.nil? ? nil : HttpClient::Preconditions.assert_class('to', x, String)),
-                :type => (x = opts.delete(:type); x.nil? ? nil : HttpClient::Preconditions.assert_class('type', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :org_key => (x = opts.delete(:org_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_key', x, String)),
+                  :application_key => (x = opts.delete(:application_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('application_key', x, String)),
+                  :from => (x = opts.delete(:from); x.nil? ? nil : HttpClient::Preconditions.assert_class('from', x, String)),
+                  :to => (x = opts.delete(:to); x.nil? ? nil : HttpClient::Preconditions.assert_class('to', x, String)),
+                  :type => (x = opts.delete(:type); x.nil? ? nil : HttpClient::Preconditions.assert_class('type', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/changes").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Change.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Change.new(x)}
             end
 
           end
@@ -404,17 +404,17 @@ module Io
             end
 
             # List all generator services
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :uri => (x = opts.delete(:uri); x.nil? ? nil : HttpClient::Preconditions.assert_class('uri', x, String)),
-                :generator_key => (x = opts.delete(:generator_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('generator_key', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 100 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :uri => (x = opts.delete(:uri); x.nil? ? nil : HttpClient::Preconditions.assert_class('uri', x, String)),
+                  :generator_key => (x = opts.delete(:generator_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('generator_key', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 100 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/generator_services").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::GeneratorService.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::GeneratorService.new(x)}
             end
 
             def get_by_guid(guid)
@@ -445,19 +445,19 @@ module Io
             end
 
             # List all available generators
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :service_guid => (x = opts.delete(:service_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('service_guid', HttpClient::Helper.to_uuid(x), String)),
-                :service_uri => (x = opts.delete(:service_uri); x.nil? ? nil : HttpClient::Preconditions.assert_class('service_uri', x, String)),
-                :attribute_name => (x = opts.delete(:attribute_name); x.nil? ? nil : HttpClient::Preconditions.assert_class('attribute_name', x, String)),
-                :key => (x = opts.delete(:key); x.nil? ? nil : HttpClient::Preconditions.assert_class('key', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 100 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :service_guid => (x = opts.delete(:service_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('service_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :service_uri => (x = opts.delete(:service_uri); x.nil? ? nil : HttpClient::Preconditions.assert_class('service_uri', x, String)),
+                  :attribute_name => (x = opts.delete(:attribute_name); x.nil? ? nil : HttpClient::Preconditions.assert_class('attribute_name', x, String)),
+                  :key => (x = opts.delete(:key); x.nil? ? nil : HttpClient::Preconditions.assert_class('key', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 100 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/generators").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::GeneratorWithService.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::GeneratorWithService.new(x)}
             end
 
             def get_by_key(key)
@@ -481,7 +481,7 @@ module Io
 
             def get_migrate
               r = @client.request("/_internal_/migrate").get
-              r.inject({}) { |hash, x| hash[x[0]] = x[1].nil? ? nil : x[1]; hash }
+              r.inject({}) {|hash, x| hash[x[0]] = x[1].nil? ? nil : x[1]; hash}
             end
 
           end
@@ -492,15 +492,15 @@ module Io
               @client = HttpClient::Preconditions.assert_class('client', client, ::Io::Apibuilder::Api::V0::Client)
             end
 
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :q => (x = opts.delete(:q); x.nil? ? nil : HttpClient::Preconditions.assert_class('q', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :q => (x = opts.delete(:q); x.nil? ? nil : HttpClient::Preconditions.assert_class('q', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/items").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Item.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Item.new(x)}
             end
 
             def get_by_guid(guid)
@@ -518,18 +518,18 @@ module Io
             end
 
             # Search all memberships. Results are always paginated.
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :org_guid => (x = opts.delete(:org_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_guid', HttpClient::Helper.to_uuid(x), String)),
-                :org_key => (x = opts.delete(:org_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_key', x, String)),
-                :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
-                :role => (x = opts.delete(:role); x.nil? ? nil : HttpClient::Preconditions.assert_class('role', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :org_guid => (x = opts.delete(:org_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :org_key => (x = opts.delete(:org_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_key', x, String)),
+                  :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :role => (x = opts.delete(:role); x.nil? ? nil : HttpClient::Preconditions.assert_class('role', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/memberships").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Membership.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Membership.new(x)}
             end
 
             def get_by_guid(guid)
@@ -553,18 +553,18 @@ module Io
             end
 
             # Search all membership requests. Results are always paginated.
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :org_guid => (x = opts.delete(:org_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_guid', HttpClient::Helper.to_uuid(x), String)),
-                :org_key => (x = opts.delete(:org_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_key', x, String)),
-                :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
-                :role => (x = opts.delete(:role); x.nil? ? nil : HttpClient::Preconditions.assert_class('role', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :org_guid => (x = opts.delete(:org_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :org_key => (x = opts.delete(:org_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('org_key', x, String)),
+                  :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :role => (x = opts.delete(:role); x.nil? ? nil : HttpClient::Preconditions.assert_class('role', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/membership_requests").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::MembershipRequest.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::MembershipRequest.new(x)}
             end
 
             # Create a membership request
@@ -598,19 +598,19 @@ module Io
             end
 
             # Search all organizations. Results are always paginated.
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
-                :key => (x = opts.delete(:key); x.nil? ? nil : HttpClient::Preconditions.assert_class('key', x, String)),
-                :name => (x = opts.delete(:name); x.nil? ? nil : HttpClient::Preconditions.assert_class('name', x, String)),
-                :namespace => (x = opts.delete(:namespace); x.nil? ? nil : HttpClient::Preconditions.assert_class('namespace', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :key => (x = opts.delete(:key); x.nil? ? nil : HttpClient::Preconditions.assert_class('key', x, String)),
+                  :name => (x = opts.delete(:name); x.nil? ? nil : HttpClient::Preconditions.assert_class('name', x, String)),
+                  :namespace => (x = opts.delete(:namespace); x.nil? ? nil : HttpClient::Preconditions.assert_class('namespace', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/organizations").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Organization.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Organization.new(x)}
             end
 
             # Returns the organization with this key.
@@ -644,16 +644,16 @@ module Io
 
             # Returns all attribute values for this organization. Results are always
             # paginated.
-            def get_attributes_by_key(key, incoming={})
+            def get_attributes_by_key(key, incoming = {})
               HttpClient::Preconditions.assert_class('key', key, String)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :name => (x = opts.delete(:name); x.nil? ? nil : HttpClient::Preconditions.assert_class('name', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :name => (x = opts.delete(:name); x.nil? ? nil : HttpClient::Preconditions.assert_class('name', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/organizations/#{CGI.escape(key)}/attributes").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::AttributeValue.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::AttributeValue.new(x)}
             end
 
             # Returns the attribute value with this name.
@@ -724,18 +724,18 @@ module Io
             end
 
             # Search subscriptions. Always paginated.
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :organization_key => (x = opts.delete(:organization_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('organization_key', x, String)),
-                :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
-                :publication => (x = opts.delete(:publication); x.nil? ? nil : (x = x; x.is_a?(::Io::Apibuilder::Api::V0::Models::Publication) ? x : ::Io::Apibuilder::Api::V0::Models::Publication.apply(x)).value),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :organization_key => (x = opts.delete(:organization_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('organization_key', x, String)),
+                  :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :publication => (x = opts.delete(:publication); x.nil? ? nil : (x = x; x.is_a?(::Io::Apibuilder::Api::V0::Models::Publication) ? x : ::Io::Apibuilder::Api::V0::Models::Publication.apply(x)).value),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/subscriptions").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Subscription.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Subscription.new(x)}
             end
 
             # Returns information about a specific subscription.
@@ -766,16 +766,16 @@ module Io
               @client = HttpClient::Preconditions.assert_class('client', client, ::Io::Apibuilder::Api::V0::Client)
             end
 
-            def get_users_by_user_guid(user_guid, incoming={})
+            def get_users_by_user_guid(user_guid, incoming = {})
               HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(user_guid), String)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/tokens/users/#{user_guid}").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Token.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Token.new(x)}
             end
 
             # Used to fetch the clear text token.
@@ -808,16 +808,16 @@ module Io
 
             # Search for a specific user. You must specify at least 1 parameter - either a
             # guid, email or token - and will receive back either 0 or 1 users.
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :email => (x = opts.delete(:email); x.nil? ? nil : HttpClient::Preconditions.assert_class('email', x, String)),
-                :nickname => (x = opts.delete(:nickname); x.nil? ? nil : HttpClient::Preconditions.assert_class('nickname', x, String)),
-                :token => (x = opts.delete(:token); x.nil? ? nil : HttpClient::Preconditions.assert_class('token', x, String))
-              }.delete_if { |k, v| v.nil? }
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :email => (x = opts.delete(:email); x.nil? ? nil : HttpClient::Preconditions.assert_class('email', x, String)),
+                  :nickname => (x = opts.delete(:nickname); x.nil? ? nil : HttpClient::Preconditions.assert_class('nickname', x, String)),
+                  :token => (x = opts.delete(:token); x.nil? ? nil : HttpClient::Preconditions.assert_class('token', x, String))
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/users").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::User.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::User.new(x)}
             end
 
             # Returns information about the user with this guid.
@@ -882,16 +882,16 @@ module Io
             end
 
             # Search all versions of this application. Results are always paginated.
-            def get_by_application_key(org_key, application_key, incoming={})
+            def get_by_application_key(org_key, application_key, incoming = {})
               HttpClient::Preconditions.assert_class('org_key', org_key, String)
               HttpClient::Preconditions.assert_class('application_key', application_key, String)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/#{CGI.escape(org_key)}/#{CGI.escape(application_key)}").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Version.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Version.new(x)}
             end
 
             # Retrieve a specific version of an application.
@@ -932,16 +932,16 @@ module Io
             end
 
             # Generates an example JSON document of the type with the specified name.
-            def get_example_by_application_key_and_version_and_type_name(org_key, application_key, version, type_name, incoming={})
+            def get_example_by_application_key_and_version_and_type_name(org_key, application_key, version, type_name, incoming = {})
               HttpClient::Preconditions.assert_class('org_key', org_key, String)
               HttpClient::Preconditions.assert_class('application_key', application_key, String)
               HttpClient::Preconditions.assert_class('version', version, String)
               HttpClient::Preconditions.assert_class('type_name', type_name, String)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :sub_type_name => (x = opts.delete(:sub_type_name); x.nil? ? nil : HttpClient::Preconditions.assert_class('sub_type_name', x, String)),
-                :optional_fields => (x = opts.delete(:optional_fields); x.nil? ? nil : HttpClient::Preconditions.assert_boolean('optional_fields', x))
-              }.delete_if { |k, v| v.nil? }
+                  :sub_type_name => (x = opts.delete(:sub_type_name); x.nil? ? nil : HttpClient::Preconditions.assert_class('sub_type_name', x, String)),
+                  :optional_fields => (x = opts.delete(:optional_fields); x.nil? ? nil : HttpClient::Preconditions.assert_boolean('optional_fields', x))
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/#{CGI.escape(org_key)}/#{CGI.escape(application_key)}/#{CGI.escape(version)}/example/#{CGI.escape(type_name)}").with_query(query).get
               r
             end
@@ -955,18 +955,18 @@ module Io
             end
 
             # Search attributes. Always paginated.
-            def get(incoming={})
+            def get(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
-                :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
-                :organization_key => (x = opts.delete(:organization_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('organization_key', x, String)),
-                :application_key => (x = opts.delete(:application_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('application_key', x, String)),
-                :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
-                :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
-              }.delete_if { |k, v| v.nil? }
+                  :guid => (x = opts.delete(:guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(x), String)),
+                  :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :organization_key => (x = opts.delete(:organization_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('organization_key', x, String)),
+                  :application_key => (x = opts.delete(:application_key); x.nil? ? nil : HttpClient::Preconditions.assert_class('application_key', x, String)),
+                  :limit => HttpClient::Preconditions.assert_class('limit', (x = opts.delete(:limit); x.nil? ? 25 : x), Integer),
+                  :offset => HttpClient::Preconditions.assert_class('offset', (x = opts.delete(:offset); x.nil? ? 0 : x), Integer)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/watches").with_query(query).get
-              r.map { |x| ::Io::Apibuilder::Api::V0::Models::Watch.new(x) }
+              r.map {|x| ::Io::Apibuilder::Api::V0::Models::Watch.new(x)}
             end
 
             # Returns information about a specific watch.
@@ -977,13 +977,13 @@ module Io
             end
 
             # Quick check if a user is watching a specific application.
-            def get_check(incoming={})
+            def get_check(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               query = {
-                :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
-                :organization_key => HttpClient::Preconditions.assert_class('organization_key', opts.delete(:organization_key), String),
-                :application_key => HttpClient::Preconditions.assert_class('application_key', opts.delete(:application_key), String)
-              }.delete_if { |k, v| v.nil? }
+                  :user_guid => (x = opts.delete(:user_guid); x.nil? ? nil : HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(x), String)),
+                  :organization_key => HttpClient::Preconditions.assert_class('organization_key', opts.delete(:organization_key), String),
+                  :application_key => HttpClient::Preconditions.assert_class('application_key', opts.delete(:application_key), String)
+              }.delete_if {|k, v| v.nil?}
               r = @client.request("/watches/check").with_query(query).get
               r
             end
@@ -1017,7 +1017,7 @@ module Io
 
             attr_reader :type
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:type], 'Diff')
               @type = HttpClient::Preconditions.assert_class('type', opts.delete(:type), String)
@@ -1038,9 +1038,12 @@ module Io
                 raise "Union type[diff] requires a field named 'type'"
               end
               case discriminator
-                when Types::DIFF_BREAKING; DiffBreaking.new(hash)
-                when Types::DIFF_NON_BREAKING; DiffNonBreaking.new(hash)
-                else DiffUndefinedType.new(:type => discriminator)
+              when Types::DIFF_BREAKING;
+                DiffBreaking.new(hash)
+              when Types::DIFF_NON_BREAKING;
+                DiffNonBreaking.new(hash)
+              else
+                DiffUndefinedType.new(:type => discriminator)
               end
             end
 
@@ -1050,7 +1053,7 @@ module Io
 
             attr_reader :name
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               super(:type => 'undefined_type')
               opts = HttpClient::Helper.symbolize_keys(incoming)
               @name = HttpClient::Preconditions.assert_class('name', opts.delete(:type), String)
@@ -1060,7 +1063,7 @@ module Io
               raise 'Unable to serialize undefined type to json'
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               raise 'Operation not supported for undefined type'
             end
 
@@ -1080,7 +1083,7 @@ module Io
 
             attr_reader :type
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:type], 'ItemDetail')
               @type = HttpClient::Preconditions.assert_class('type', opts.delete(:type), String)
@@ -1101,8 +1104,10 @@ module Io
                 raise "Union type[item_detail] requires a field named 'type'"
               end
               case discriminator
-                when Types::APPLICATION_SUMMARY; ApplicationSummary.new(hash)
-                else ItemDetailUndefinedType.new(:type => discriminator)
+              when Types::APPLICATION_SUMMARY;
+                ApplicationSummary.new(hash)
+              else
+                ItemDetailUndefinedType.new(:type => discriminator)
               end
             end
 
@@ -1112,7 +1117,7 @@ module Io
 
             attr_reader :name
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               super(:type => 'undefined_type')
               opts = HttpClient::Helper.symbolize_keys(incoming)
               @name = HttpClient::Preconditions.assert_class('name', opts.delete(:type), String)
@@ -1122,7 +1127,7 @@ module Io
               raise 'Unable to serialize undefined type to json'
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               raise 'Operation not supported for undefined type'
             end
 
@@ -1153,7 +1158,7 @@ module Io
             # Returns the instance of AppSortBy for this value, or nil if not found
             def AppSortBy.from_string(value)
               HttpClient::Preconditions.assert_class('value', value, String)
-              AppSortBy.ALL.find { |v| v.value == value }
+              AppSortBy.ALL.find {|v| v.value == value}
             end
 
             def AppSortBy.ALL
@@ -1203,7 +1208,7 @@ module Io
             # Returns the instance of OriginalType for this value, or nil if not found
             def OriginalType.from_string(value)
               HttpClient::Preconditions.assert_class('value', value, String)
-              OriginalType.ALL.find { |v| v.value == value }
+              OriginalType.ALL.find {|v| v.value == value}
             end
 
             def OriginalType.ALL
@@ -1258,7 +1263,7 @@ module Io
             # Returns the instance of Publication for this value, or nil if not found
             def Publication.from_string(value)
               HttpClient::Preconditions.assert_class('value', value, String)
-              Publication.ALL.find { |v| v.value == value }
+              Publication.ALL.find {|v| v.value == value}
             end
 
             def Publication.ALL
@@ -1315,7 +1320,7 @@ module Io
             # Returns the instance of SortOrder for this value, or nil if not found
             def SortOrder.from_string(value)
               HttpClient::Preconditions.assert_class('value', value, String)
-              SortOrder.ALL.find { |v| v.value == value }
+              SortOrder.ALL.find {|v| v.value == value}
             end
 
             def SortOrder.ALL
@@ -1357,7 +1362,7 @@ module Io
             # Returns the instance of Visibility for this value, or nil if not found
             def Visibility.from_string(value)
               HttpClient::Preconditions.assert_class('value', value, String)
-              Visibility.ALL.find { |v| v.value == value }
+              Visibility.ALL.find {|v| v.value == value}
             end
 
             def Visibility.ALL
@@ -1390,7 +1395,7 @@ module Io
 
             attr_reader :guid, :organization, :name, :key, :visibility, :description, :last_updated_at, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :organization, :name, :key, :visibility, :last_updated_at, :audit], 'Application')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -1407,20 +1412,20 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Application.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :organization => organization.to_hash,
-                :name => name,
-                :key => key,
-                :visibility => visibility.value,
-                :description => description,
-                :last_updated_at => last_updated_at,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :organization => organization.to_hash,
+                  :name => name,
+                  :key => key,
+                  :visibility => visibility.value,
+                  :description => description,
+                  :last_updated_at => last_updated_at,
+                  :audit => audit.to_hash
               }
             end
 
@@ -1430,7 +1435,7 @@ module Io
 
             attr_reader :name, :key, :description, :visibility
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:name, :visibility], 'ApplicationForm')
               @name = HttpClient::Preconditions.assert_class('name', opts.delete(:name), String)
@@ -1443,16 +1448,16 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               ApplicationForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :name => name,
-                :key => key,
-                :description => description,
-                :visibility => visibility.value
+                  :name => name,
+                  :key => key,
+                  :description => description,
+                  :visibility => visibility.value
               }
             end
 
@@ -1462,7 +1467,7 @@ module Io
 
             attr_reader :guid, :key
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :key], 'ApplicationMetadata')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -1473,14 +1478,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               ApplicationMetadata.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :key => key
+                  :guid => guid,
+                  :key => key
               }
             end
 
@@ -1491,7 +1496,7 @@ module Io
 
             attr_reader :version
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:version], 'ApplicationMetadataVersion')
               @version = HttpClient::Preconditions.assert_class('version', opts.delete(:version), String)
@@ -1501,13 +1506,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               ApplicationMetadataVersion.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :version => version
+                  :version => version
               }
             end
 
@@ -1518,7 +1523,7 @@ module Io
 
             attr_reader :guid, :organization, :key
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               super(:type => ItemDetail::Types::APPLICATION_SUMMARY)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :organization, :key], 'ApplicationSummary')
@@ -1531,15 +1536,15 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               ApplicationSummary.new(subtype_to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def subtype_to_hash
               {
-                :guid => guid,
-                :organization => organization.to_hash,
-                :key => key
+                  :guid => guid,
+                  :organization => organization.to_hash,
+                  :key => key
               }
             end
 
@@ -1551,7 +1556,7 @@ module Io
 
             attr_reader :guid, :name, :description, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :name, :audit], 'Attribute')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -1564,16 +1569,16 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Attribute.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :name => name,
-                :description => description,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :name => name,
+                  :description => description,
+                  :audit => audit.to_hash
               }
             end
 
@@ -1583,7 +1588,7 @@ module Io
 
             attr_reader :name, :description
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:name], 'AttributeForm')
               @name = HttpClient::Preconditions.assert_class('name', opts.delete(:name), String)
@@ -1594,14 +1599,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               AttributeForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :name => name,
-                :description => description
+                  :name => name,
+                  :description => description
               }
             end
 
@@ -1611,7 +1616,7 @@ module Io
 
             attr_reader :guid, :name
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :name], 'AttributeSummary')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -1622,14 +1627,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               AttributeSummary.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :name => name
+                  :guid => guid,
+                  :name => name
               }
             end
 
@@ -1642,7 +1647,7 @@ module Io
 
             attr_reader :guid, :attribute, :value, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :attribute, :value, :audit], 'AttributeValue')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -1655,16 +1660,16 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               AttributeValue.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :attribute => attribute.to_hash,
-                :value => value,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :attribute => attribute.to_hash,
+                  :value => value,
+                  :audit => audit.to_hash
               }
             end
 
@@ -1674,7 +1679,7 @@ module Io
 
             attr_reader :value
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:value], 'AttributeValueForm')
               @value = HttpClient::Preconditions.assert_class('value', opts.delete(:value), String)
@@ -1684,13 +1689,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               AttributeValueForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :value => value
+                  :value => value
               }
             end
 
@@ -1701,7 +1706,7 @@ module Io
 
             attr_reader :user, :session
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:user, :session], 'Authentication')
               @user = (x = opts.delete(:user); x.is_a?(::Io::Apibuilder::Api::V0::Models::User) ? x : ::Io::Apibuilder::Api::V0::Models::User.new(x))
@@ -1712,14 +1717,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Authentication.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :user => user.to_hash,
-                :session => session.to_hash
+                  :user => user.to_hash,
+                  :session => session.to_hash
               }
             end
 
@@ -1730,7 +1735,7 @@ module Io
 
             attr_reader :guid, :organization, :application, :from_version, :to_version, :diff, :changed_at, :changed_by, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :organization, :application, :from_version, :to_version, :diff, :changed_at, :changed_by, :audit], 'Change')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -1748,21 +1753,21 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Change.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :organization => organization.to_hash,
-                :application => application.to_hash,
-                :from_version => from_version.to_hash,
-                :to_version => to_version.to_hash,
-                :diff => diff.to_hash,
-                :changed_at => changed_at,
-                :changed_by => changed_by.to_hash,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :organization => organization.to_hash,
+                  :application => application.to_hash,
+                  :from_version => from_version.to_hash,
+                  :to_version => to_version.to_hash,
+                  :diff => diff.to_hash,
+                  :changed_at => changed_at,
+                  :changed_by => changed_by.to_hash,
+                  :audit => audit.to_hash
               }
             end
 
@@ -1774,7 +1779,7 @@ module Io
 
             attr_reader :guid, :version
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :version], 'ChangeVersion')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -1785,14 +1790,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               ChangeVersion.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :version => version
+                  :guid => guid,
+                  :version => version
               }
             end
 
@@ -1803,7 +1808,7 @@ module Io
 
             attr_reader :token
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:token], 'CleartextToken')
               @token = HttpClient::Preconditions.assert_class('token', opts.delete(:token), String)
@@ -1813,13 +1818,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               CleartextToken.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :token => token
+                  :token => token
               }
             end
 
@@ -1830,27 +1835,27 @@ module Io
 
             attr_reader :generator, :source, :files
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:generator, :source], 'Code')
               @generator = (x = opts.delete(:generator); x.is_a?(::Io::Apibuilder::Api::V0::Models::GeneratorWithService) ? x : ::Io::Apibuilder::Api::V0::Models::GeneratorWithService.new(x))
               @source = HttpClient::Preconditions.assert_class('source', opts.delete(:source), String)
-              @files = HttpClient::Preconditions.assert_class('files', (x = opts.delete(:files); x.nil? ? [] : x), Array).map { |v| (x = v; x.is_a?(::Io::Apibuilder::Generator::V0::Models::File) ? x : ::Io::Apibuilder::Generator::V0::Models::File.new(x)) }
+              @files = HttpClient::Preconditions.assert_class('files', (x = opts.delete(:files); x.nil? ? [] : x), Array).map {|v| (x = v; x.is_a?(::Io::Apibuilder::Generator::V0::Models::File) ? x : ::Io::Apibuilder::Generator::V0::Models::File.new(x))}
             end
 
             def to_json
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Code.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :generator => generator.to_hash,
-                :source => source,
-                :files => files.map { |o| o.to_hash }
+                  :generator => generator.to_hash,
+                  :source => source,
+                  :files => files.map {|o| o.to_hash}
               }
             end
 
@@ -1860,23 +1865,23 @@ module Io
 
             attr_reader :attributes
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:attributes], 'CodeForm')
-              @attributes = HttpClient::Preconditions.assert_class('attributes', opts.delete(:attributes), Array).map { |v| (x = v; x.is_a?(::Io::Apibuilder::Generator::V0::Models::Attribute) ? x : ::Io::Apibuilder::Generator::V0::Models::Attribute.new(x)) }
+              @attributes = HttpClient::Preconditions.assert_class('attributes', opts.delete(:attributes), Array).map {|v| (x = v; x.is_a?(::Io::Apibuilder::Generator::V0::Models::Attribute) ? x : ::Io::Apibuilder::Generator::V0::Models::Attribute.new(x))}
             end
 
             def to_json
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               CodeForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :attributes => attributes.map { |o| o.to_hash }
+                  :attributes => attributes.map {|o| o.to_hash}
               }
             end
 
@@ -1889,7 +1894,7 @@ module Io
 
             attr_reader :description
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               super(:type => Diff::Types::DIFF_BREAKING)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:description], 'DiffBreaking')
@@ -1900,13 +1905,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               DiffBreaking.new(subtype_to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def subtype_to_hash
               {
-                :description => description
+                  :description => description
               }
             end
 
@@ -1917,7 +1922,7 @@ module Io
 
             attr_reader :description
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               super(:type => Diff::Types::DIFF_NON_BREAKING)
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:description], 'DiffNonBreaking')
@@ -1928,13 +1933,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               DiffNonBreaking.new(subtype_to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def subtype_to_hash
               {
-                :description => description
+                  :description => description
               }
             end
 
@@ -1950,7 +1955,7 @@ module Io
 
             attr_reader :name
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:name], 'Domain')
               @name = HttpClient::Preconditions.assert_class('name', opts.delete(:name), String)
@@ -1960,13 +1965,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Domain.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :name => name
+                  :name => name
               }
             end
 
@@ -1979,7 +1984,7 @@ module Io
 
             attr_reader :token
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:token], 'EmailVerificationConfirmationForm')
               @token = HttpClient::Preconditions.assert_class('token', opts.delete(:token), String)
@@ -1989,13 +1994,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               EmailVerificationConfirmationForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :token => token
+                  :token => token
               }
             end
 
@@ -2005,7 +2010,7 @@ module Io
 
             attr_reader :code, :message
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:code, :message], 'Error')
               @code = HttpClient::Preconditions.assert_class('code', opts.delete(:code), String)
@@ -2016,14 +2021,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Error.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :code => code,
-                :message => message
+                  :code => code,
+                  :message => message
               }
             end
 
@@ -2033,7 +2038,7 @@ module Io
 
             attr_reader :service_guid, :generator
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:service_guid, :generator], 'GeneratorForm')
               @service_guid = HttpClient::Preconditions.assert_class('service_guid', HttpClient::Helper.to_uuid(opts.delete(:service_guid)), String)
@@ -2044,14 +2049,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               GeneratorForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :service_guid => service_guid,
-                :generator => generator.to_hash
+                  :service_guid => service_guid,
+                  :generator => generator.to_hash
               }
             end
 
@@ -2062,7 +2067,7 @@ module Io
 
             attr_reader :guid, :uri, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :uri, :audit], 'GeneratorService')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2074,15 +2079,15 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               GeneratorService.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :uri => uri,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :uri => uri,
+                  :audit => audit.to_hash
               }
             end
 
@@ -2092,7 +2097,7 @@ module Io
 
             attr_reader :uri
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:uri], 'GeneratorServiceForm')
               @uri = HttpClient::Preconditions.assert_class('uri', opts.delete(:uri), String)
@@ -2102,13 +2107,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               GeneratorServiceForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :uri => uri
+                  :uri => uri
               }
             end
 
@@ -2119,7 +2124,7 @@ module Io
 
             attr_reader :service, :generator
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:service, :generator], 'GeneratorWithService')
               @service = (x = opts.delete(:service); x.is_a?(::Io::Apibuilder::Api::V0::Models::GeneratorService) ? x : ::Io::Apibuilder::Api::V0::Models::GeneratorService.new(x))
@@ -2130,14 +2135,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               GeneratorWithService.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :service => service.to_hash,
-                :generator => generator.to_hash
+                  :service => service.to_hash,
+                  :generator => generator.to_hash
               }
             end
 
@@ -2150,7 +2155,7 @@ module Io
 
             attr_reader :guid, :detail, :label, :description
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :detail, :label], 'Item')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2163,16 +2168,16 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Item.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :detail => detail.to_hash,
-                :label => label,
-                :description => description
+                  :guid => guid,
+                  :detail => detail.to_hash,
+                  :label => label,
+                  :description => description
               }
             end
 
@@ -2185,7 +2190,7 @@ module Io
 
             attr_reader :guid, :user, :organization, :role, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :user, :organization, :role, :audit], 'Membership')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2199,17 +2204,17 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Membership.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :user => user.to_hash,
-                :organization => organization.to_hash,
-                :role => role,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :user => user.to_hash,
+                  :organization => organization.to_hash,
+                  :role => role,
+                  :audit => audit.to_hash
               }
             end
 
@@ -2223,7 +2228,7 @@ module Io
 
             attr_reader :guid, :user, :organization, :role, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :user, :organization, :role, :audit], 'MembershipRequest')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2237,17 +2242,17 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               MembershipRequest.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :user => user.to_hash,
-                :organization => organization.to_hash,
-                :role => role,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :user => user.to_hash,
+                  :organization => organization.to_hash,
+                  :role => role,
+                  :audit => audit.to_hash
               }
             end
 
@@ -2257,7 +2262,7 @@ module Io
 
             attr_reader :org_key
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:org_key], 'MoveForm')
               @org_key = HttpClient::Preconditions.assert_class('org_key', opts.delete(:org_key), String)
@@ -2267,13 +2272,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               MoveForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :org_key => org_key
+                  :org_key => org_key
               }
             end
 
@@ -2284,7 +2289,7 @@ module Io
 
             attr_reader :guid, :key, :name, :namespace, :visibility, :domains, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :key, :name, :namespace, :visibility, :audit], 'Organization')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2292,7 +2297,7 @@ module Io
               @name = HttpClient::Preconditions.assert_class('name', opts.delete(:name), String)
               @namespace = HttpClient::Preconditions.assert_class('namespace', opts.delete(:namespace), String)
               @visibility = (x = opts.delete(:visibility); x.is_a?(::Io::Apibuilder::Api::V0::Models::Visibility) ? x : ::Io::Apibuilder::Api::V0::Models::Visibility.apply(x))
-              @domains = HttpClient::Preconditions.assert_class('domains', (x = opts.delete(:domains); x.nil? ? [] : x), Array).map { |v| (x = v; x.is_a?(::Io::Apibuilder::Api::V0::Models::Domain) ? x : ::Io::Apibuilder::Api::V0::Models::Domain.new(x)) }
+              @domains = HttpClient::Preconditions.assert_class('domains', (x = opts.delete(:domains); x.nil? ? [] : x), Array).map {|v| (x = v; x.is_a?(::Io::Apibuilder::Api::V0::Models::Domain) ? x : ::Io::Apibuilder::Api::V0::Models::Domain.new(x))}
               @audit = (x = opts.delete(:audit); x.is_a?(::Io::Apibuilder::Common::V0::Models::Audit) ? x : ::Io::Apibuilder::Common::V0::Models::Audit.new(x))
             end
 
@@ -2300,19 +2305,19 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Organization.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :key => key,
-                :name => name,
-                :namespace => namespace,
-                :visibility => visibility.value,
-                :domains => domains.map { |o| o.to_hash },
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :key => key,
+                  :name => name,
+                  :namespace => namespace,
+                  :visibility => visibility.value,
+                  :domains => domains.map {|o| o.to_hash},
+                  :audit => audit.to_hash
               }
             end
 
@@ -2322,31 +2327,31 @@ module Io
 
             attr_reader :name, :key, :namespace, :visibility, :domains
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:name, :namespace], 'OrganizationForm')
               @name = HttpClient::Preconditions.assert_class('name', opts.delete(:name), String)
               @key = (x = opts.delete(:key); x.nil? ? nil : HttpClient::Preconditions.assert_class('key', x, String))
               @namespace = HttpClient::Preconditions.assert_class('namespace', opts.delete(:namespace), String)
               @visibility = (x = (x = opts.delete(:visibility); x.nil? ? "organization" : x); x.is_a?(::Io::Apibuilder::Api::V0::Models::Visibility) ? x : ::Io::Apibuilder::Api::V0::Models::Visibility.apply(x))
-              @domains = (x = opts.delete(:domains); x.nil? ? nil : HttpClient::Preconditions.assert_class('domains', x, Array).map { |v| HttpClient::Preconditions.assert_class('domains', v, String) })
+              @domains = (x = opts.delete(:domains); x.nil? ? nil : HttpClient::Preconditions.assert_class('domains', x, Array).map {|v| HttpClient::Preconditions.assert_class('domains', v, String)})
             end
 
             def to_json
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               OrganizationForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :name => name,
-                :key => key,
-                :namespace => namespace,
-                :visibility => visibility.value,
-                :domains => domains.nil? ? nil : domains
+                  :name => name,
+                  :key => key,
+                  :namespace => namespace,
+                  :visibility => visibility.value,
+                  :domains => domains.nil? ? nil : domains
               }
             end
 
@@ -2357,7 +2362,7 @@ module Io
 
             attr_reader :type, :data
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:type, :data], 'Original')
               @type = (x = opts.delete(:type); x.is_a?(::Io::Apibuilder::Api::V0::Models::OriginalType) ? x : ::Io::Apibuilder::Api::V0::Models::OriginalType.apply(x))
@@ -2368,14 +2373,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Original.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :type => type.value,
-                :data => data
+                  :type => type.value,
+                  :data => data
               }
             end
 
@@ -2385,7 +2390,7 @@ module Io
 
             attr_reader :type, :data
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:data], 'OriginalForm')
               @type = (x = opts.delete(:type); x.nil? ? nil : (x = x; x.is_a?(::Io::Apibuilder::Api::V0::Models::OriginalType) ? x : ::Io::Apibuilder::Api::V0::Models::OriginalType.apply(x)))
@@ -2396,14 +2401,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               OriginalForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :type => type.nil? ? nil : type.value,
-                :data => data
+                  :type => type.nil? ? nil : type.value,
+                  :data => data
               }
             end
 
@@ -2414,7 +2419,7 @@ module Io
 
             attr_reader :token, :password
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:token, :password], 'PasswordReset')
               @token = HttpClient::Preconditions.assert_class('token', opts.delete(:token), String)
@@ -2425,14 +2430,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               PasswordReset.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :token => token,
-                :password => password
+                  :token => token,
+                  :password => password
               }
             end
 
@@ -2444,7 +2449,7 @@ module Io
 
             attr_reader :email
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:email], 'PasswordResetRequest')
               @email = HttpClient::Preconditions.assert_class('email', opts.delete(:email), String)
@@ -2454,13 +2459,13 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               PasswordResetRequest.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :email => email
+                  :email => email
               }
             end
 
@@ -2471,7 +2476,7 @@ module Io
 
             attr_reader :id, :expires_at
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:id, :expires_at], 'Session')
               @id = HttpClient::Preconditions.assert_class('id', opts.delete(:id), String)
@@ -2482,14 +2487,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Session.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :id => id,
-                :expires_at => expires_at
+                  :id => id,
+                  :expires_at => expires_at
               }
             end
 
@@ -2500,7 +2505,7 @@ module Io
 
             attr_reader :guid, :organization, :user, :publication, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :organization, :user, :publication, :audit], 'Subscription')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2514,17 +2519,17 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Subscription.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :organization => organization.to_hash,
-                :user => user.to_hash,
-                :publication => publication.value,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :organization => organization.to_hash,
+                  :user => user.to_hash,
+                  :publication => publication.value,
+                  :audit => audit.to_hash
               }
             end
 
@@ -2534,7 +2539,7 @@ module Io
 
             attr_reader :organization_key, :user_guid, :publication
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:organization_key, :user_guid, :publication], 'SubscriptionForm')
               @organization_key = HttpClient::Preconditions.assert_class('organization_key', opts.delete(:organization_key), String)
@@ -2546,15 +2551,15 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               SubscriptionForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :organization_key => organization_key,
-                :user_guid => user_guid,
-                :publication => publication.value
+                  :organization_key => organization_key,
+                  :user_guid => user_guid,
+                  :publication => publication.value
               }
             end
 
@@ -2565,7 +2570,7 @@ module Io
 
             attr_reader :guid, :user, :masked_token, :description, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :user, :masked_token, :audit], 'Token')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2579,17 +2584,17 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Token.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :user => user.to_hash,
-                :masked_token => masked_token,
-                :description => description,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :user => user.to_hash,
+                  :masked_token => masked_token,
+                  :description => description,
+                  :audit => audit.to_hash
               }
             end
 
@@ -2599,7 +2604,7 @@ module Io
 
             attr_reader :user_guid, :description
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:user_guid], 'TokenForm')
               @user_guid = HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(opts.delete(:user_guid)), String)
@@ -2610,14 +2615,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               TokenForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :user_guid => user_guid,
-                :description => description
+                  :user_guid => user_guid,
+                  :description => description
               }
             end
 
@@ -2628,7 +2633,7 @@ module Io
 
             attr_reader :guid, :email, :nickname, :name, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :email, :nickname, :audit], 'User')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2642,17 +2647,17 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               User.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :email => email,
-                :nickname => nickname,
-                :name => name,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :email => email,
+                  :nickname => nickname,
+                  :name => name,
+                  :audit => audit.to_hash
               }
             end
 
@@ -2662,7 +2667,7 @@ module Io
 
             attr_reader :email, :password, :nickname, :name
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:email, :password], 'UserForm')
               @email = HttpClient::Preconditions.assert_class('email', opts.delete(:email), String)
@@ -2675,16 +2680,16 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               UserForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :email => email,
-                :password => password,
-                :nickname => nickname,
-                :name => name
+                  :email => email,
+                  :password => password,
+                  :nickname => nickname,
+                  :name => name
               }
             end
 
@@ -2695,7 +2700,7 @@ module Io
 
             attr_reader :guid, :nickname
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :nickname], 'UserSummary')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2706,14 +2711,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               UserSummary.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :nickname => nickname
+                  :guid => guid,
+                  :nickname => nickname
               }
             end
 
@@ -2723,7 +2728,7 @@ module Io
 
             attr_reader :email, :nickname, :name
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:email, :nickname], 'UserUpdateForm')
               @email = HttpClient::Preconditions.assert_class('email', opts.delete(:email), String)
@@ -2735,15 +2740,15 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               UserUpdateForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :email => email,
-                :nickname => nickname,
-                :name => name
+                  :email => email,
+                  :nickname => nickname,
+                  :name => name
               }
             end
 
@@ -2755,25 +2760,25 @@ module Io
 
             attr_reader :valid, :errors
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:valid], 'Validation')
               @valid = HttpClient::Preconditions.assert_boolean('valid', opts.delete(:valid))
-              @errors = HttpClient::Preconditions.assert_class('errors', (x = opts.delete(:errors); x.nil? ? [] : x), Array).map { |v| HttpClient::Preconditions.assert_class('errors', v, String) }
+              @errors = HttpClient::Preconditions.assert_class('errors', (x = opts.delete(:errors); x.nil? ? [] : x), Array).map {|v| HttpClient::Preconditions.assert_class('errors', v, String)}
             end
 
             def to_json
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Validation.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :valid => valid,
-                :errors => errors
+                  :valid => valid,
+                  :errors => errors
               }
             end
 
@@ -2784,7 +2789,7 @@ module Io
 
             attr_reader :guid, :organization, :application, :version, :original, :service, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :organization, :application, :version, :service, :audit], 'Version')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2800,19 +2805,19 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Version.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :organization => organization.to_hash,
-                :application => application.to_hash,
-                :version => version,
-                :original => original.nil? ? nil : original.to_hash,
-                :service => service.to_hash,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :organization => organization.to_hash,
+                  :application => application.to_hash,
+                  :version => version,
+                  :original => original.nil? ? nil : original.to_hash,
+                  :service => service.to_hash,
+                  :audit => audit.to_hash
               }
             end
 
@@ -2822,7 +2827,7 @@ module Io
 
             attr_reader :original_form, :visibility
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:original_form], 'VersionForm')
               @original_form = (x = opts.delete(:original_form); x.is_a?(::Io::Apibuilder::Api::V0::Models::OriginalForm) ? x : ::Io::Apibuilder::Api::V0::Models::OriginalForm.new(x))
@@ -2833,14 +2838,14 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               VersionForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :original_form => original_form.to_hash,
-                :visibility => visibility.nil? ? nil : visibility.value
+                  :original_form => original_form.to_hash,
+                  :visibility => visibility.nil? ? nil : visibility.value
               }
             end
 
@@ -2852,7 +2857,7 @@ module Io
 
             attr_reader :guid, :user, :organization, :application, :audit
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:guid, :user, :organization, :application, :audit], 'Watch')
               @guid = HttpClient::Preconditions.assert_class('guid', HttpClient::Helper.to_uuid(opts.delete(:guid)), String)
@@ -2866,17 +2871,17 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               Watch.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :guid => guid,
-                :user => user.to_hash,
-                :organization => organization.to_hash,
-                :application => application.to_hash,
-                :audit => audit.to_hash
+                  :guid => guid,
+                  :user => user.to_hash,
+                  :organization => organization.to_hash,
+                  :application => application.to_hash,
+                  :audit => audit.to_hash
               }
             end
 
@@ -2886,7 +2891,7 @@ module Io
 
             attr_reader :user_guid, :organization_key, :application_key
 
-            def initialize(incoming={})
+            def initialize(incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               HttpClient::Preconditions.require_keys(opts, [:user_guid, :organization_key, :application_key], 'WatchForm')
               @user_guid = HttpClient::Preconditions.assert_class('user_guid', HttpClient::Helper.to_uuid(opts.delete(:user_guid)), String)
@@ -2898,15 +2903,15 @@ module Io
               JSON.dump(to_hash)
             end
 
-            def copy(incoming={})
+            def copy(incoming = {})
               WatchForm.new(to_hash.merge(HttpClient::Helper.symbolize_keys(incoming)))
             end
 
             def to_hash
               {
-                :user_guid => user_guid,
-                :organization_key => organization_key,
-                :application_key => application_key
+                  :user_guid => user_guid,
+                  :organization_key => organization_key,
+                  :application_key => application_key
               }
             end
 
@@ -2961,10 +2966,10 @@ module Io
 
             def execute(request)
               response = begin
-                           @client.request(request)
-                         rescue SocketError => e
-                           raise StandardError.new("Error accessing uri[#{full_uri(request.path)}]: #{e}")
-                         end
+                @client.request(request)
+              rescue SocketError => e
+                raise StandardError.new("Error accessing uri[#{full_uri(request.path)}]: #{e}")
+              end
 
               case response
               when Net::HTTPSuccess
@@ -3106,7 +3111,7 @@ module Io
                 request.add_field("Authorization", "Basic %s" % encoded)
               end
 
-              @headers.each { |key, value|
+              @headers.each {|key, value|
                 # DEBUG curl <<  "-H \"%s: %s\"" % [key, value]
                 request.add_field(key, value)
               }
@@ -3125,10 +3130,11 @@ module Io
             end
 
             private
-            def to_query(params={})
-              parts = (params || {}).map { |k,v|
+
+            def to_query(params = {})
+              parts = (params || {}).map {|k, v|
                 if v.is_a?(Enumerable)
-                  v.map { |el| "%s=%s" % [k, CGI.escape(el.to_s)] }
+                  v.map {|el| "%s=%s" % [k, CGI.escape(el.to_s)]}
                 else
                   "%s=%s" % [k, CGI.escape(v.to_s)]
                 end
@@ -3142,7 +3148,7 @@ module Io
 
             attr_reader :code, :details, :body, :uri
 
-            def initialize(code, details, incoming={})
+            def initialize(code, details, incoming = {})
               opts = HttpClient::Helper.symbolize_keys(incoming)
               @code = HttpClient::Preconditions.assert_class('code', code, Integer)
               @details = HttpClient::Preconditions.assert_class('details', details, String)
@@ -3179,28 +3185,28 @@ module Io
 
           module Preconditions
 
-            def Preconditions.check_argument(expression, error_message=nil)
+            def Preconditions.check_argument(expression, error_message = nil)
               if !expression
                 raise PreconditionException.new(error_message || "check_argument failed")
               end
               nil
             end
 
-            def Preconditions.check_state(expression, error_message=nil)
+            def Preconditions.check_state(expression, error_message = nil)
               if !expression
                 raise PreconditionException.new(error_message || "check_state failed")
               end
               nil
             end
 
-            def Preconditions.check_not_nil(field_name, reference, error_message=nil)
+            def Preconditions.check_not_nil(field_name, reference, error_message = nil)
               if reference.nil?
                 raise PreconditionException.new(error_message || "argument for %s cannot be nil" % field_name)
               end
               reference
             end
 
-            def Preconditions.check_not_blank(field_name, reference, error_message=nil)
+            def Preconditions.check_not_blank(field_name, reference, error_message = nil)
               if reference.to_s.strip == ""
                 raise PreconditionException.new(error_message || "argument for %s cannot be blank" % field_name)
               end
@@ -3217,8 +3223,8 @@ module Io
 
             # Requires that the provided hash has the specified keys.
             # @param fields A list of symbols
-            def Preconditions.require_keys(hash, fields, error_prefix=nil)
-              missing = fields.select { |f| !hash.has_key?(f) }
+            def Preconditions.require_keys(hash, fields, error_prefix = nil)
+              missing = fields.select {|f| !hash.has_key?(f)}
               if !missing.empty?
                 msg = "Missing required fields: " + missing.join(", ")
                 raise PreconditionException.new(error_prefix.empty? ? msg : "#{error_prefix}: #{msg}")
@@ -3260,12 +3266,12 @@ module Io
 
             def Preconditions.assert_collection_of_class(field_name, values, klass)
               Preconditions.assert_class(field_name, values, Array)
-              values.each { |v| Preconditions.assert_class(field_name, v, klass) }
+              values.each {|v| Preconditions.assert_class(field_name, v, klass)}
             end
 
             def Preconditions.assert_hash_of_class(field_name, hash, klass)
               Preconditions.assert_class(field_name, hash, Hash)
-              values.each { |k, v| Preconditions.assert_class(field_name, v, klass) }
+              values.each {|k, v| Preconditions.assert_class(field_name, v, klass)}
             end
 
           end
@@ -3286,14 +3292,14 @@ module Io
 
             attr_reader :scheme, :username, :password
 
-            def initialize(scheme, username, opts={})
+            def initialize(scheme, username, opts = {})
               @scheme = HttpClient::Preconditions.assert_class('schema', scheme, AuthScheme)
               @username = HttpClient::Preconditions.check_not_blank('username', username, "username is required")
               @password = HttpClient::Preconditions.assert_class_or_nil('password', opts.delete(:password), String)
               HttpClient::Preconditions.assert_empty_opts(opts)
             end
 
-            def Authorization.basic(username, password=nil)
+            def Authorization.basic(username, password = nil)
               Authorization.new(AuthScheme::BASIC, username, :password => password)
             end
 
@@ -3304,7 +3310,7 @@ module Io
             def Helper.symbolize_keys(hash)
               Preconditions.assert_class('hash', hash, Hash)
               new_hash = {}
-              hash.each { |k, v|
+              hash.each {|k, v|
                 new_hash[k.to_sym] = v
               }
               new_hash

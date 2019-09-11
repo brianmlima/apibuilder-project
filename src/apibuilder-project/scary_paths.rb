@@ -10,7 +10,6 @@ module ScaryPaths
       /^#{Regexp.quote(File.absolute_path(File.expand_path("~/")))}$/
   ]
 
-
   class PathChecks
     def PathChecks.failOnScaryPath(*paths)
       paths.each do |path|

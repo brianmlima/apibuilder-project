@@ -80,7 +80,6 @@ module ApibuilderProject
   class StaticFiles
 
     def StaticFiles.copyFiles(project_base_dir:)
-
       # puts "called"
       staticResources = [
           StaticResource.new(
@@ -95,7 +94,6 @@ module ApibuilderProject
       end
     end
   end
-
 
   class ReadMe
 

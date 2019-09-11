@@ -11,7 +11,7 @@ load File.join(lib_dir, 'preconditions.rb')
 load File.join(lib_dir, 'util.rb')
 load File.join(lib_dir, 'app_config.rb')
 load File.join(lib_dir, 'scary_paths.rb')
-load File.join(lib_dir, 'git.rb')
+load File.join(lib_dir, 'integrations.rb')
 load File.join(lib_dir, 'templates.rb')
 
 ########################################################################################################################

@@ -7,7 +7,7 @@ require 'bundler/inline'
 require 'bundler'
 require 'json'
 # Bundler.configure
-gemfile(true) do
+gemfile(false) do
   source "https://rubygems.org"
   gem "octokit", "~> 4.0"
   gem 'git', '~> 1.5'
@@ -22,45 +22,42 @@ end
 
 appConfig = ApibuilderProject::AppConfig.new(ARGV, __FILE__)
 
-debug = appConfig.debug
+# debug = appConfig.debug
 
-if !appConfig.local_only
+@debug = appConfig.debug
 
-  apibuilderClient = ApibuilderCli::Config.client_from_profile(:profile => appConfig.apibuilder_profile, :token => appConfig.apibuilder_token)
-  github = ApibuilderProject::GithubProject.new(:access_token => appConfig.github_token, :project_name => appConfig.project_name)
+@integration_manager = ApibuilderProject::IntegrationManager.new(:app_config => appConfig)
 
-#############
-# Check to make sure the app and repo does not already exist and make sure the organization exists.
-#############
+@do_integrations = @integration_manager.do_integrations
+@use_git = @integration_manager.use_git
+@use_github = @integration_manager.use_github
+@use_apibuilder_io = @integration_manager.use_apibuilder_io
 
-
-  if github.repo_exists
+# If we are using integrations we have to check them to make sure we are not accidently overwriting
+# existing repositories / applications and that the application organization exists
+# This should also fail the app if the required configurations are not available or are invalid
+if @do_integrations
+  if @use_github && @integration_manager.github_repo_exists
     puts "The derrived project name #{appConfig.project_name} already exists, perhaps you should choose another application name. Cowardly refusing to continue"
     exit false
   end
-
-  remoteOrg = apibuilderClient.organizations.get.find {|org| org.name == appConfig.organization}
-  remoteApp = apibuilderClient.applications.get(remoteOrg.key).find {|app| app.name == appConfig.application}
-
-# org_exists = v.any? {|org| org.name == appConfig.organization}
-  if remoteOrg
-    puts "Confirmed Organization #{appConfig.organization} exists" if debug
-  else
-    puts "Apinuilder Organization #{appConfig.organization} does not exist. Cowardly failing."
-    exit false
+  if @use_apibuilder_io
+    if @integration_manager.apibuilder_org_exists
+      puts "Confirmed Organization #{appConfig.organization} exists" if @debug
+    else
+      puts "Apinuilder Organization #{appConfig.organization} does not exist. Cowardly failing."
+      exit false
+    end
+    if @integration_manager.apibuilder_app_exists
+      puts "WARNING ApiBuilder Application #{appConfig.application} already exists in organization #{appConfig.organization}. Cowardly failing"
+      exit false
+    else
+      puts "Confirmed Application #{appConfig.application} does not exist in organization #{appConfig.organization}" if @debug
+    end
   end
-
-  if remoteApp
-    puts "WARNING ApiBuilder Application #{appConfig.application} already exists in organization #{appConfig.organization}. Cowardly failing"
-    exit false
-  else
-    puts "Confirmed Application #{appConfig.application} does not exist in organization #{appConfig.organization}" if debug
-  end
-
 end
 
-
-if appConfig.debug
+if @debug
   puts "organization=#{appConfig.organization}"
   puts "application=#{appConfig.application}"
   puts "version=#{appConfig.version}"
@@ -132,32 +129,24 @@ ApibuilderProject::ReadMe.write(
     project_base_dir: appConfig.project_base_dir
 )
 
-
 ApibuilderProject::StaticFiles.copyFiles(:project_base_dir => appConfig.project_base_dir)
 
+if @do_integrations
+  if @use_github
+    @integration_manager.github_repo_create
+  end
+  if @use_git
+    @integration_manager.git_init
+    @integration_manager.git_add
+    @integration_manager.git_commit("Initial Automated Commit from #{File.basename(__FILE__)}")
 
-if !appConfig.local_only
-
-  github.create
-
-  ApibuilderProject::GitProject.init(
-      organization: appConfig.organization,
-      application: appConfig.application,
-      version: appConfig.version,
-      project_base_dir: appConfig.project_base_dir,
-      git_remote: github.remote
-  )
-
-  application_form = Io::Apibuilder::Api::V0::Models::ApplicationForm.new(
-      :name => appConfig.application,
-      :key => appConfig.application,
-      :description => "",
-      :visibility => Io::Apibuilder::Api::V0::Models::Visibility.organization
-  )
-
-  apibuilderClient.applications.post(remoteOrg.key, application_form)
+    if @use_github
+      @integration_manager.git_add_remote(@integration_manager.github_remote)
+      @integration_manager.git_push
+    end
+  end
+  if @use_apibuilder_io
+    puts "NOT WORKING"
+    @integration_manager.apibuilder_create_application
+  end
 end
-
-# puts "----------------"
-# puts githubClient.user.login
-# puts "----------------"
