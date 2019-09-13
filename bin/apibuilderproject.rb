@@ -146,7 +146,6 @@ if @do_integrations
     end
   end
   if @use_apibuilder_io
-    puts "NOT WORKING"
     @integration_manager.apibuilder_create_application
   end
 end
