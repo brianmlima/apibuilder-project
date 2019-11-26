@@ -22,6 +22,18 @@ function pushApiJson(){
     popd > /dev/null
 }
 
+function pushLatest(){
+    printMSG "${INFO} Moving to working directory at ${PROJECT_HOME}"
+    pushd ${PROJECT_HOME} > /dev/null ;
+        apibuilder upload \
+        ${conf_apibuilder_app_organization} \
+        ${conf_apibuilder_app_application} \
+        api.json \
+        --version latest --update-config | while read line ; do  printMSG "${INFO} ${line}"; done;
+    checkStatus ${PIPESTATUS[0]} "Push Success" "Push FAILURE"
+    popd > /dev/null
+}
+
 function generate(){
     printMSG "${INFO} Moving to working directory at ${PROJECT_HOME}"
     pushd ${PROJECT_HOME} > /dev/null ;
