@@ -53,6 +53,8 @@ module ApibuilderProject
       @clean = false
       @debug = false
       @local_only = false
+      @github_token_file = nil
+
 
 
       optionParser = OptionParser.new do |opts|
@@ -109,20 +111,29 @@ module ApibuilderProject
       logAndFail(optionParser, reqArgMessage(org_opt)) if @organization == nil
       logAndFail(optionParser, reqArgMessage(version_opt)) if @version == nil
       logAndFail(optionParser, reqArgMessage(path_opt)) if @target_directory == nil
-      logAndFail(optionParser, reqArgMessage(github_token_file_opt)) if @github_token_file == nil
+      # logAndFail(optionParser, reqArgMessage(github_token_file_opt)) if @github_token_file == nil
 
       @project_name = "#{@organization}.api.#{@application}"
 
       @target_directory = File.absolute_path(File.expand_path(@target_directory))
       @project_base_dir = File.absolute_path(File.expand_path("#{@target_directory}/#{@project_name}"))
 
-      @github_token_file = File.absolute_path(File.expand_path("#{@github_token_file}"))
-      logAndFail(optionParser, "The token file at #{@github_token_file} does not exist.") if !File.exist?(@github_token_file)
-      @github_token = IO.read(@github_token_file)
-      logAndFail(optionParser, "The token file at #{@github_token_file} is empty.") if @github_token == nil
+
+      if(@github_token_file != nil)
+        @github_token_file = File.absolute_path(File.expand_path("#{@github_token_file}"))
+        logAndFail(optionParser, "The token file at #{@github_token_file} does not exist.") if !File.exist?(@github_token_file)
+        @github_token = IO.read(@github_token_file)
+        logAndFail(optionParser, "The token file at #{@github_token_file} is empty.") if @github_token == nil
+      end
+      # Makes the token file argument required if not in local only mode.
+      logAndFail(optionParser, "You must pass a github token file if not in local only mode.") if(@local_only == false && @github_token_file == nil)
 
       @apibuilder_profile = ApibuilderCli::Util.read_non_empty_string(ENV['PROFILE'])
       @apibuilder_token = ApibuilderCli::Util.read_non_empty_string(ENV['APIBUILDER_TOKEN']) || ApibuilderCli::Util.read_non_empty_string(ENV['APIDOC_TOKEN'])
+
+
+
+
 
     end
   end
