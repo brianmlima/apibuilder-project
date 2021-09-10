@@ -1,6 +1,6 @@
 require 'erb'
 require 'fileutils'
-
+require_relative 'app_config.rb'
 
 module ApibuilderProject
 
@@ -18,6 +18,7 @@ module ApibuilderProject
       IO.write(api_json_file, content)
     end
   end
+
 
   class GeneratorConfig
 

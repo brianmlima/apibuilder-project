@@ -19,7 +19,10 @@ module ApibuilderProject
                 :apibuilder_profile,
                 :apibuilder_token,
                 :debug,
-                :local_only
+                :local_only,
+                :add_spring_maven,
+                :group_id
+
 
     OptionSpec = Struct.new(:short, :long, :type, :description)
     SwitchSpec = Struct.new(:short, :long, :description)
@@ -47,14 +50,19 @@ module ApibuilderProject
       debug_opt = SwitchSpec.new("--debug", "", "if set and the project destination directory exists all contents will be deleted before continuing")
       show_scary_paths_opt = SwitchSpec.new("-s", "--scary-paths", "if set prints scary paths and exits")
       local_only_opt = SwitchSpec.new("-L", "--local-only", "if set I will not check apibuilder.io or github to check for existing conflicting projects. I will also not create a new apibuilder porject or github repository")
-
+      add_spring_maven_opt = SwitchSpec.new("-M", "--spring-maven", "if set I will add in a working pom.xml and a generic src directory tree for building this project using maven and spring")
+      group_id_opt = OptionSpec.new("-g", "--group-id GROUPID", String, "The group id used for build configurations. IE Maven or Gradle. Required when using switches that enable build template generation.")
 
       @force = false
       @clean = false
       @debug = false
       @local_only = false
       @github_token_file = nil
+      @add_spring_maven = false
+      @group_id = nil
 
+      @apibuilder_profile = nil
+      @apibuilder_token = nil
 
 
       optionParser = OptionParser.new do |opts|
@@ -87,6 +95,7 @@ module ApibuilderProject
           @clean = true
         end
 
+
         opts.on(local_only_opt.short, local_only_opt.long, local_only_opt.description) do |v|
           @local_only = true
         end
@@ -96,9 +105,17 @@ module ApibuilderProject
         end
         opts.on(show_scary_paths_opt.short, show_scary_paths_opt.long, show_scary_paths_opt.description) do
           puts "Scary paths are as follows"
-          ScaryPaths.each {|pattern| puts pattern.source}
+          ScaryPaths.each { |pattern| puts pattern.source }
           exit
         end
+        ## All the build system template configs.
+        opts.on(add_spring_maven_opt.short, add_spring_maven_opt.long, add_spring_maven_opt.description) do |v|
+          @add_spring_maven = true
+        end
+        opts.on(group_id_opt.short, group_id_opt.long, group_id_opt.type, group_id_opt.description) do |v|
+          @group_id = v
+        end
+
       end
 
       begin
@@ -119,20 +136,28 @@ module ApibuilderProject
       @project_base_dir = File.absolute_path(File.expand_path("#{@target_directory}/#{@project_name}"))
 
 
-      if(@github_token_file != nil)
+      if (@local_only == false)
+        # Makes the token file argument required if not in local only mode.
+        logAndFail(optionParser, "You must pass a github token file if not in local only mode.") if (@github_token_file == nil)
         @github_token_file = File.absolute_path(File.expand_path("#{@github_token_file}"))
         logAndFail(optionParser, "The token file at #{@github_token_file} does not exist.") if !File.exist?(@github_token_file)
         @github_token = IO.read(@github_token_file)
         logAndFail(optionParser, "The token file at #{@github_token_file} is empty.") if @github_token == nil
+        @apibuilder_profile = ApibuilderCli::Util.read_non_empty_string(ENV['PROFILE'])
+        @apibuilder_token = ApibuilderCli::Util.read_non_empty_string(ENV['APIBUILDER_TOKEN']) || ApibuilderCli::Util.read_non_empty_string(ENV['APIDOC_TOKEN'])
       end
-      # Makes the token file argument required if not in local only mode.
-      logAndFail(optionParser, "You must pass a github token file if not in local only mode.") if(@local_only == false && @github_token_file == nil)
-
-      @apibuilder_profile = ApibuilderCli::Util.read_non_empty_string(ENV['PROFILE'])
-      @apibuilder_token = ApibuilderCli::Util.read_non_empty_string(ENV['APIBUILDER_TOKEN']) || ApibuilderCli::Util.read_non_empty_string(ENV['APIDOC_TOKEN'])
 
 
+      if (@add_spring_maven) # We are going to template out a spring maven build system
 
+        if (@local_only == false && @group_id == nil)
+          #Try and use the apibuilder client to get the organizations namespace.
+          logAndFail(optionParser, "You must pass a group_id if attempting to use build templates. In the future if not in local only mode I will use the organizations namespace as the group id.") if (@group_id == nil)
+        end
+
+        logAndFail(optionParser, "You must pass a group_id if attempting to use build templates and in local only mode. If not in local only mode I will use the organizations namespace as the group id.") if (@group_id == nil)
+
+      end
 
 
     end

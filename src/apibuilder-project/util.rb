@@ -5,7 +5,7 @@ module ApibuilderProject
   module Util
 
     def Util.file_join(*args)
-      args.select! {|s| s.to_s.strip != ""}
+      args.select! { |s| s.to_s.strip != "" }
       File.join(*args)
     end
 
@@ -23,6 +23,13 @@ module ApibuilderProject
       end
       path
     end
+
+    def Util.mkdirs(target_directory)
+      if !Dir.exist?(target_directory)
+        FileUtils.mkdir_p target_directory
+      end
+    end
+
 
     # Returns the trimmed value if not empty. If empty (or nil) returns nil
     def Util.read_non_empty_string(value)

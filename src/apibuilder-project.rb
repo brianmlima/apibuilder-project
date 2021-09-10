@@ -13,6 +13,7 @@ load File.join(lib_dir, 'app_config.rb')
 load File.join(lib_dir, 'scary_paths.rb')
 load File.join(lib_dir, 'integrations.rb')
 load File.join(lib_dir, 'templates.rb')
+load File.join(lib_dir, 'java-spring.rb')
 
 ########################################################################################################################
 # Load Apibuilder.io latest API
