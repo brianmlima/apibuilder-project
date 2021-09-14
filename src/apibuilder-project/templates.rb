@@ -1,9 +1,8 @@
 require 'erb'
 require 'fileutils'
-require_relative 'app_config.rb'
+# require_relative 'app_config.rb'
 
 module ApibuilderProject
-
 
   class ApiJson
 
@@ -18,7 +17,6 @@ module ApibuilderProject
       IO.write(api_json_file, content)
     end
   end
-
 
   class GeneratorConfig
 
@@ -42,7 +40,6 @@ module ApibuilderProject
       IO.write(conf_file, content)
     end
   end
-
 
   class GitIgnore
     OUTPUT_FILE_NAME = ".gitignore"
@@ -75,7 +72,6 @@ module ApibuilderProject
     end
   end
 
-
   StaticResource = Struct.new(:loc, :dest, :is_dir)
 
   class StaticFiles
@@ -83,16 +79,14 @@ module ApibuilderProject
     def StaticFiles.copyFiles(project_base_dir:)
       # puts "called"
       staticResources = [
-          StaticResource.new(
-              Util.absolute_path("#{File.dirname(__FILE__)}/../templates/bin"),
-              Util.absolute_path("#{project_base_dir}"),
-              true)
+        StaticResource.new(
+          Util.absolute_path("#{File.dirname(__FILE__)}/../templates/bin"),
+          Util.absolute_path("#{project_base_dir}"),
+          true) #,
       ]
-      staticResources.each do |v|
-        if v.is_dir == true
-          FileUtils.cp_r v.loc, v.dest
-        end
-      end
+
+      Util.copyFiles(staticResources)
+
     end
   end
 
@@ -117,6 +111,5 @@ module ApibuilderProject
     end
 
   end
-
 
 end

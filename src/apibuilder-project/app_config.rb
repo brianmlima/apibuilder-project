@@ -1,9 +1,7 @@
 require 'optparse'
 require 'fileutils'
 
-
 module ApibuilderProject
-
 
   class AppConfig
 
@@ -21,8 +19,8 @@ module ApibuilderProject
                 :debug,
                 :local_only,
                 :add_spring_maven,
-                :group_id
-
+                :group_id,
+                :project_package
 
     OptionSpec = Struct.new(:short, :long, :type, :description)
     SwitchSpec = Struct.new(:short, :long, :description)
@@ -42,7 +40,7 @@ module ApibuilderProject
 
       github_token_file_opt = OptionSpec.new("-t", "--token-file TOKEN_FILE", String, "A file that contains a github token")
       org_opt = OptionSpec.new("-o", "--organization ORGANIZATION", String, "(Required) the apibuilder organization key")
-      app_opt = OptionSpec.new("-a", "--application APPLICATION", String, "(Required) the apibuilder application key")
+      app_opt = OptionSpec.new("-a", "--application APPLICATION", String, "(Required) the apibuilder application key. This should be a dash separated string if multiple words are necessary.")
       version_opt = OptionSpec.new("-v", "--version VERSION", String, "(Required) the application version")
       path_opt = OptionSpec.new("-d", "--destination DESTINATION", String, "(Required) the destination directory where the template will be rendered")
       force_opt = SwitchSpec.new("-f", "--force", "if set the destination directory will be created if it does not exist and existing files will be overwritten")
@@ -63,7 +61,7 @@ module ApibuilderProject
 
       @apibuilder_profile = nil
       @apibuilder_token = nil
-
+      @project_package = nil
 
       optionParser = OptionParser.new do |opts|
         opts.banner = "Usage: #{File.basename(script_path)} [options]"
@@ -94,7 +92,6 @@ module ApibuilderProject
         opts.on(clean_opt.short, clean_opt.long, clean_opt.description) do |v|
           @clean = true
         end
-
 
         opts.on(local_only_opt.short, local_only_opt.long, local_only_opt.description) do |v|
           @local_only = true
@@ -135,7 +132,6 @@ module ApibuilderProject
       @target_directory = File.absolute_path(File.expand_path(@target_directory))
       @project_base_dir = File.absolute_path(File.expand_path("#{@target_directory}/#{@project_name}"))
 
-
       if (@local_only == false)
         # Makes the token file argument required if not in local only mode.
         logAndFail(optionParser, "You must pass a github token file if not in local only mode.") if (@github_token_file == nil)
@@ -147,18 +143,17 @@ module ApibuilderProject
         @apibuilder_token = ApibuilderCli::Util.read_non_empty_string(ENV['APIBUILDER_TOKEN']) || ApibuilderCli::Util.read_non_empty_string(ENV['APIDOC_TOKEN'])
       end
 
-
       if (@add_spring_maven) # We are going to template out a spring maven build system
-
         if (@local_only == false && @group_id == nil)
           #Try and use the apibuilder client to get the organizations namespace.
           logAndFail(optionParser, "You must pass a group_id if attempting to use build templates. In the future if not in local only mode I will use the organizations namespace as the group id.") if (@group_id == nil)
         end
+        # puts(@application)
+        @project_package = "#{@group_id}.#{@application.split(/[\-\_\.]/).join(".")}"
+        # puts(@project_package)
 
         logAndFail(optionParser, "You must pass a group_id if attempting to use build templates and in local only mode. If not in local only mode I will use the organizations namespace as the group id.") if (@group_id == nil)
-
       end
-
 
     end
   end

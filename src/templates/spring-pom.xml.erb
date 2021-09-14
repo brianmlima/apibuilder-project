@@ -12,26 +12,531 @@
 
   <!-- Project Metadata -->
   <modelVersion>4.0.0</modelVersion>
-  <groupId><%= config.group_id %></groupId>
-  <artifactId><%= config.project_name %></artifactId>
-  <version><%= config.version %></version>
+  <groupId><%= groupId %></groupId>
+  <artifactId><%= artifactId %></artifactId>
+  <version><%= version %></version>
 
   <!-- Project Properties -->
   <properties>
-      <java.version>1.11</java.version>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <maven.compiler.source>1.11</maven.compiler.source>
-      <maven.compiler.target>1.11</maven.compiler.target>
-      <compiler.args></compiler.args>
-      <lombok.version>1.18.20</lombok.version>
+    <!--    <java.version>11</java.version>-->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!--    <maven.compiler.source>11</maven.compiler.source>-->
+    <!--    <maven.compiler.target>11</maven.compiler.target>-->
+    <!--    <compiler.args></compiler.args>-->
+
+
+    <!-- BOM Versions -->
+    <!--    <slf4j-bom.version>1.7.25</slf4j-bom.version>-->
+    <!--    <jackson-bom.version>2.12.5</jackson-bom.version>-->
+
+    <!-- Dependency Versions -->
+    <!--    <lombok.version>1.18.20</lombok.version>-->
+    <!--    <springfox.version>3.0.0</springfox.version>-->
+    <!--    <guava.version>30.0-jre</guava.version>-->
+
+    <!-- Test Dependency Versions -->
+    <!--    <junit.jupiter.version>5.7.0</junit.jupiter.version>-->
+    <!--    <otj-pg-embedded.version>0.13.3</otj-pg-embedded.version>-->
+    <!--    <lorem.version>2.1</lorem.version>-->
+    <!--    <mockito.version>3.6.28</mockito.version>-->
+    <!--    <hamcrest.version>2.2</hamcrest.version>-->
+    <!--    <javafaker.version>1.0.2</javafaker.version>-->
+
+    <!-- Plugin Versions -->
+    <!--    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>-->
+    <!--    <maven-enforcer-plugin.version>3.0.0</maven-enforcer-plugin.version>-->
+    <!--    <lombok-maven-plugin.version>1.18.0.0</lombok-maven-plugin.version>-->
+    <!--    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>-->
+    <!--    <javadoc.plugin.version>3.0.0-M1</javadoc.plugin.version>-->
+    <!--    <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>-->
+
+    <!-- Plugin Configuration -->
+    <!--    <delombok.output>${project.build.directory}/delombok</delombok.output>-->
+    <!--    <javadoc.detect.links>true</javadoc.detect.links>-->
+
+
+    <!-- We love new java features, but we lag behind a few versions to let others sort out any jvm bugs. -->
+    <java.version>11</java.version>
+
+    <!-- ####################################################################################################### -->
+    <!-- ####################################################################################################### -->
+    <!-- # As we move closer to production on the Atlas platform almost everything below except for your app specific
+        Dependencies will be moved into the platformm parent project so this pom will be very skinny.
+    -->
+    <!-- ####################################################################################################### -->
+    <!-- the config dir for random files. -->
+    <confHome>${project.basedir}/conf</confHome>
+
+    <!-- ####################################################################################################### -->
+    <!-- We should always be using the Test profile for spring, prod is only for running in production, not for
+    testing or running locally -->
+    <spring.profiles.active>test</spring.profiles.active>
+
+    <!-- ####################################################################################################### -->
+    <!-- SpringFox serves our generated OpenApi spec for people who are interested in that sort of thing. -->
+    <springfox.version>3.0.0</springfox.version>
+
+    <!-- ####################################################################################################### -->
+    <!-- Keeping Jackson vaersions in sync is a good thing so we use a BOM. This syncs all jackson versions. -->
+    <jackson-bom.version>2.11.3</jackson-bom.version>
+
+    <!-- ####################################################################################################### -->
+    <!-- Testing Execution -->
+
+    <!-- ####################################################################################################### -->
+    <!-- Our Junit 5 Version -->
+    <junit.jupiter.version>5.7.0</junit.jupiter.version>
+
+    <!-- ####################################################################################################### -->
+    <!-- Default Logback configuration file used for testing -->
+    <logback.configurationFile>./conf/logback/info.xml</logback.configurationFile>
+
+    <!-- ####################################################################################################### -->
+    <!-- Surefire Execution -->
+    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+    <!-- If true surefire will trim stack traces from error reports -->
+    <maven-surefire-plugin.trimStackTrace>false</maven-surefire-plugin.trimStackTrace>
+    <!-- The number of JVM's spawned to run tests in paralell -->
+    <maven-surefire-plugin.forkCount>1</maven-surefire-plugin.forkCount>
+    <!-- Should surefire reuse JVM's spawned for testing. If false it will create new JVM's for each suite -->
+    <maven-surefire-plugin.reuseForks>true</maven-surefire-plugin.reuseForks>
+    <!-- If set to a positive integer surefire will fail the build after the set number of failures. If set to 0
+    it will run all tests and give a full report when finished only then failing the build if there are any failing tests.-->
+    <maven-surefire-plugin.skipAfterFailureCount>0</maven-surefire-plugin.skipAfterFailureCount>
+    <!-- If true surefire will never fail the build even if any tests fail. Leave this alone. -->
+    <maven-surefire-plugin.testFailureIgnore>false</maven-surefire-plugin.testFailureIgnore>
+
+    <!-- ####################################################################################################### -->
+    <!--# SureFire does not play perfectly well with Jacoc test coverage so Jacoco sets this var. We leave it empty
+    here so that we dont see any errors because of the missing property in editors.-->
+    <!--        <maven-surefire-plugin.argLine></maven-surefire-plugin.argLine>-->
+
+    <!--#########################################################################################################-->
+    <!-- Javadoc Plugin Version -->
+    <javadoc.plugin.version>3.0.0-M1</javadoc.plugin.version>
+    <!-- Should Javadoc try to put in links for classes it knows about. yes, yes it should.-->
+    <javadoc.detect.links>true</javadoc.detect.links>
+
+    <!--#########################################################################################################-->
+    <!-- SpotBugs is a more security oriented findbugs -->
+    <spotbugs.plugun.version>4.1.3</spotbugs.plugun.version>
+    <spotbugs.plugin.include.filter.path>${confHome}/spotbugs/spotbugs-security-include.xml
+    </spotbugs.plugin.include.filter.path>
+    <spotbugs.plugin.exclude.filter.path>${confHome}/spotbugs/spotbugs-security-exclude.xml
+    </spotbugs.plugin.exclude.filter.path>
+    <spotbugs.skip>false</spotbugs.skip>
+
+    <!--#########################################################################################################-->
+    <!-- jacoco figures out test coverage to the branch for us -->
+    <!-- JaCoCo Version -->
+    <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
+    <!-- JaCoCo Report paths for site reporting -->
+    <jacoco.reportPath>>${project.build.directory}/jacoco.exec</jacoco.reportPath>
+    <jacoco.itReportPath>>${project.build.directory}/jacoco-it.exec</jacoco.itReportPath>
+
+    <!--#########################################################################################################-->
+    <!-- LOGBACK CONFIG for testing output only. -->
+    <logback.configurationFile>${basedir}/conf/logback.xml</logback.configurationFile>
+
+    <!--#########################################################################################################-->
+    <!-- Reporting Plugins-->
+    <maven-project-info-reports-plugin.version>3.1.1</maven-project-info-reports-plugin.version>
+    <!-- Maven Site Plugin Version. We have to set this due to versioning problems -->
+    <org.apache.maven.plugins.maven-site-plugin.version>3.7.1</org.apache.maven.plugins.maven-site-plugin.version>
+    <!-- Doxis lib version used by Maven Site Plugin. We have to set this due to versioning problems -->
+    <org.apache.maven.doxia.doxia-site-renderer.version>1.8.1</org.apache.maven.doxia.doxia-site-renderer.version>
+
+    <!--#########################################################################################################-->
+    <!-- Javadoc Plugin Version -->
+    <javadoc.plugin.version>3.0.0-M1</javadoc.plugin.version>
+    <javadoc.detect.links>true</javadoc.detect.links>
+
+    <!--#########################################################################################################-->
+    <!-- Delombok Plugin - Javadoc hates lombok so we run the javadoc tool on de-lomboked code. This is the only time it is used -->
+    <delombok.output>target/delombok-sources/</delombok.output>
+    <!--#########################################################################################################-->
+    <!-- Testing Postgres-->
+    <!-- https://mvnrepository.com/artifact/com.opentable.components/otj-pg-embedded -->
+    <otj-pg-embedded.version>0.13.3</otj-pg-embedded.version>
+    <!--#########################################################################################################-->
+    <!-- Lets manage our database schema migrations like a boss. Use Flyway and enjoy CI -->
+    <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+    <flyway-core.version>7.5.3</flyway-core.version>
+    <!--#########################################################################################################-->
+    <!-- Hibernate Took over C3P0 so we use their version, not the hibernate ORM -->
+    <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+    <hibernate-core.version>5.4.1.Final</hibernate-core.version>
+
+    <!-- ####################################################################################################### -->
+    <!-- Although the service code generation we are using does not leverage reactor yet, Generated clients and some of the
+     infrastructure does use reactor patterns.
+     -->
+    <reactor-spring.version>1.0.1.RELEASE</reactor-spring.version>
+
   </properties>
+
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- ####################################################################################################### -->
+      <!-- Dealing with slf4j version dependencies is hard so lets use a BOM to do it for us -->
+      <dependency>
+        <groupId>com.eoniantech.build</groupId>
+        <artifactId>slf4j-bom</artifactId>
+        <version>1.7.25</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <!-- ####################################################################################################### -->
+      <!-- Dealing with jackson version dependencies is hard so lets use a BOM to do it for us -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson-bom.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+
+  <!-- Project Dependencies -->
+  <dependencies>
+
+    <!--#########################################################################################################-->
+    <!--#########################################################################################################-->
+    <!--#########################################################################################################-->
+    <!-- BEGIN PROJECT SPECIFIC -->
+
+    <!--#########################################################################################################-->
+    <!-- Lets manage our data source schema migrations like a boss, Use Flyway and enjoy CI for db schemas. -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <!--#########################################################################################################-->
+    <!-- Use c3po for connection pooling. Just because we don't like Hibernate does not mean it does not have
+            the best connection pool impl. No leaks!
+            -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-c3p0</artifactId>
+      <version>${hibernate-core.version}</version>
+    </dependency>
+    <!-- This app uses postgres (Aurora IE columnar pretending to be rdbms) because its easy for now so we need a
+            driver, we should probubly use the async driver in the future but for now this one is super fast and
+            stable even if it does block.
+            -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.2.18</version>
+    </dependency>
+
+    <!--#########################################################################################################-->
+    <!-- We use a real postgres to run tests against , pay the tax on test time and ensure there are never any issues with deployment,
+         we dont need a local postgres db instance, and we force all interaction with the db to be through flyway and
+         the api. I wish there was a good way to do this for all AWS managed services.
+     -->
+    <dependency>
+      <groupId>com.opentable.components</groupId>
+      <artifactId>otj-pg-embedded</artifactId>
+      <version>${otj-pg-embedded.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- END PROJECT SPECIFIC -->
+    <!--#########################################################################################################-->
+    <!--#########################################################################################################-->
+    <!--#########################################################################################################-->
+
+    <!--#########################################################################################################-->
+    <!--#########################################################################################################-->
+    <!--#########################################################################################################-->
+    <!-- BEGIN PLATFORM LEVEL TODO: This stuff is in the process of being moved into the platform Java/Spring service archetype parent pom. -->
+
+    <!-- ####################################################################################################### -->
+    <!-- We use lombok in generators and why would you ever write an accessor or a builder. -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.8</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- ####################################################################################################### -->
+    <!-- Generation uses guava to protect things like lists with ImmutableList to stop engineers from using a crowbar on the
+         generated code. This dependency should be removed in the next generator update.
+         -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>28.0-jre</version>
+    </dependency>
+
+    <!-- ####################################################################################################### -->
+    <!-- Generation uses Lang3 StringUtils. This dependency will be removed in the next generator version.
+    -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+
+    <!-- ####################################################################################################### -->
+    <!-- Generation uses jackson annotations for pojos to ensure major version forward and baackward compatability -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <!-- We like yaml and generation allows you to chose to get api results back in yaml if you really want it. -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+    </dependency>
+
+    <!-- ####################################################################################################### -->
+    <!-- BEGIN SPRING -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-reactor-netty</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <!-- END SPRING -->
+    <!-- ####################################################################################################### -->
+
+    <!-- ####################################################################################################### -->
+    <!-- BEGIN Reactor Netty -->
+    <dependency>
+      <groupId>io.projectreactor.netty</groupId>
+      <artifactId>reactor-netty-http</artifactId>
+      <version>1.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>io.projectreactor.netty</groupId>
+      <artifactId>reactor-netty-core</artifactId>
+      <version>1.0.6</version>
+    </dependency>
+    <!-- END Reactor Netty -->
+    <!-- ####################################################################################################### -->
+
+    <!-- ####################################################################################################### -->
+    <!-- BEGIN SLF4j LOGGBACK -->
+    <!-- Logging! NEVER ALLOW LOG4J-->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-ext</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.1.9</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>log4j-bridge</artifactId>
+      <version>0.9.7</version>
+      <type>jar</type>
+    </dependency>
+    <!-- END SLF4j LOGGBACK -->
+    <!-- ####################################################################################################### -->
+
+    <!-- ####################################################################################################### -->
+    <!-- BEGIN SpringFox -->
+    <dependency>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-swagger2</artifactId>
+      <version>${springfox.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-swagger-ui</artifactId>
+      <version>${springfox.version}</version>
+    </dependency>
+    <!-- END SpringFox -->
+    <!-- ####################################################################################################### -->
+
+    <!-- ####################################################################################################### -->
+    <!-- BEGIN TEST DEPS -->
+    <!-- Spring test utilis -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- Matcher framework for writing tests -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>2.1</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- For random text generation -->
+    <dependency>
+      <groupId>com.thedeanda</groupId>
+      <artifactId>lorem</artifactId>
+      <version>2.1</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Helper for random text generation -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>1.9</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- END TEST DEPS -->
+    <!-- ####################################################################################################### -->
+
+  </dependencies>
+
   <!-- Project Build -->
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>${org.apache.maven.plugins.maven-pmd-plugin.version}</version>
+        </plugin>
         <!--
-          Normally we would not have to declare the compiler plugin but we have to do annotation processing so we
-          declare the compiler plugin and explicitly add the lombok processor.
+            Manage explicitly excluded dependencies and fail the build with a helpfull error message if one is found.
+            Since logging is so important to debugging and auditing
+            we use the enforcer plugin to fail the build if any dependencies
+            include commons-logging, log4j or slf4j-log4j12.
+            This ensures logging will function as designed even if a transitive dependency imports a library that could break it.
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+          <configuration>
+            <rules>
+              <bannedDependencies>
+                <!-- FAIL the build if found.-->
+                <level>ERROR</level>
+                <excludes>
+                  <exclude>log4j:log4j</exclude>
+                  <exclude>commons-logging:commons-logging</exclude>
+                  <exclude>org.slf4j:slf4j-log4j12</exclude>
+                  <message>RUN "mvn dependency:tree
+                    -Dincludes=log4j:log4j,commons-logging:commons-logging,org.slf4j:slf4j-log4j12"
+                    to find the source of the banned dependency and exclude it. These dependencies
+                    can not be allowed to leak into the project.
+                  </message>
+                </excludes>
+                <searchTransitive>true</searchTransitive>
+              </bannedDependencies>
+            </rules>
+            <fail>true</fail>
+          </configuration>
+          <executions>
+            <execution>
+              <id>enforce-banned-dependencies</id>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!--
+            JavaDoc built from source and de-lombok'd generator source code.
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.2.0</version>
+          <configuration>
+            <failOnError>false</failOnError>
+            <show>package</show>
+            <javadocVersion>1.5</javadocVersion>
+            <source>1.8</source>
+            <version>true</version>
+            <detectOfflineLinks>true</detectOfflineLinks>
+            <detectLinks>true</detectLinks>
+          </configuration>
+          <executions>
+            <execution>
+              <id>engineered-code</id>
+              <goals>
+                <goal>javadoc</goal>
+              </goals>
+              <phase>site</phase>
+              <configuration>
+                <doclint>none</doclint>
+                <sourcepath>${project.basedir}/src/main/java: ${delombok.output}</sourcepath>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!--
+            Javadoc is basically incompatible with Lombok because it operates on source code before any annotation processors
+            have been run. This creates a situation where some of Lombok's features cause Javadoc to error out with a non-zero
+            exit code and fail the build. In order to eliminate this problem we de-lombok the source code into a directory that
+            is only used for generating javadocs. Its ugly but until Javadoc is updated to be compatable with tools like lombok
+            this is the cleanest solution.
+        -->
+        <plugin>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok-maven-plugin</artifactId>
+          <version>${lombok-maven-plugin.version}</version>
+          <configuration>
+            <sourceDirectory>${project.basedir}/generated/src/main/java</sourceDirectory>
+            <outputDirectory>${delombok.output}</outputDirectory>
+            <addOutputDirectory>false</addOutputDirectory>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>pre-site</phase>
+              <goals>
+                <goal>delombok</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!--
+            Normally we would not have to declare the compiler plugin but we have to do annotation processing so we
+            declare the compiler plugin and explicitly add the lombok processor.
         -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -49,8 +554,371 @@
             </annotationProcessorPaths>
           </configuration>
         </plugin>
+
+
+        <!--
+            The Build Helper plugin helps us seperate generated source code from hand written source code.
+        -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>generated/src/main/java</source>
+                </sources>
+              </configuration>
+            </execution>
+            <execution>
+              <id>add-test-source</id>
+              <phase>generate-test-sources</phase>
+              <goals>
+                <goal>add-test-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>generated/src/test/java</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Copy dependencies to a viewable lib directory for review. We might want to make this happen on a switch only -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>copy-dependencies</id>
+              <phase>package</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <silent>true</silent>
+                <skip>false</skip>
+                <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                <overWriteReleases>false</overWriteReleases>
+                <overWriteSnapshots>false</overWriteSnapshots>
+                <overWriteIfNewer>true</overWriteIfNewer>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Use CheckStyle to enforce code style and help with code quality. Fail the build on error. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>3.1.1</version>
+          <executions>
+            <execution>
+              <id>checkstyle</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <configuration>
+                <configLocation>${project.basedir}/conf/checkstyle/checkstyle.xml</configLocation>
+                <encoding>UTF-8</encoding>
+                <consoleOutput>true</consoleOutput>
+                <failsOnError>true</failsOnError>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Use SpotBugs to find common bugs and help with code quality. Fail the build on error. -->
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>4.1.4</version>
+          <configuration>
+            <failOnError>true</failOnError>
+            <effort>Max</effort>
+            <threshold>Low</threshold>
+            <xmlOutput>true</xmlOutput>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Test runner with configuration properties so you can fork and run tests in parallel. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+          <configuration>
+            <useFile>false</useFile>
+            <forkCount>${maven-surefire-plugin.forkCount}</forkCount>
+            <reuseForks>${maven-surefire-plugin.reuseForks}</reuseForks>
+            <skipAfterFailureCount>${maven-surefire-plugin.skipAfterFailureCount}</skipAfterFailureCount>
+            <testFailureIgnore>${maven-surefire-plugin.testFailureIgnore}</testFailureIgnore>
+            <systemPropertyVariables>
+              <!--                        <buildDirectory>${project.build.directory}</buildDirectory>-->
+              <logback.configurationFile>${logback.configurationFile}</logback.configurationFile>
+              <com.mchange.v2.log.MLog>com.mchange.v2.log.slf4j.Slf4jMLog</com.mchange.v2.log.MLog>
+              <surefire.trimStackTrace>false</surefire.trimStackTrace>
+            </systemPropertyVariables>
+            <additionalClasspathElements>
+              <additionalClasspathElement>${pom.basedir}/src/test/resources</additionalClasspathElement>
+            </additionalClasspathElements>
+          </configuration>
+        </plugin>
+        <!--
+        Jacoco provides instrumentation and reporting on code coverage for testing. TODO: Fail the build if
+        coverage is under an agreed upon level.
+        -->
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+          <configuration>
+            <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+            <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>prepare-package</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+            <!-- need to run maven verify to the this to run. -->
+            <!-- Threshold -->
+            <execution>
+              <id>coverage-check</id>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <rule>
+                    <element>BUNDLE</element>
+                    <limits>
+                      <limit>
+                        <counter>LINE</counter>
+                        <value>COVEREDRATIO</value>
+                        <minimum>.90</minimum>
+                      </limit>
+                    </limits>
+                  </rule>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+
+        <!--                <plugin>-->
+        <!--                  <groupId>org.jacoco</groupId>-->
+        <!--                  <artifactId>jacoco-maven-plugin</artifactId>-->
+        <!--                  <version>${jacoco-maven-plugin.version}</version>-->
+        <!--                  <configuration>-->
+
+        <!--                  </configuration>-->
+        <!--                  <executions>-->
+        <!--                    <execution>-->
+        <!--                      <id>jacoco-initialize</id>-->
+        <!--                      <goals>-->
+        <!--                        <goal>prepare-agent</goal>-->
+        <!--                      </goals>-->
+        <!--                    </execution>-->
+        <!--                    <execution>-->
+        <!--                      <id>jacoco-site</id>-->
+        <!--                      <phase>package</phase>-->
+        <!--                      <goals>-->
+        <!--                        <goal>report</goal>-->
+        <!--                      </goals>-->
+        <!--                    </execution>-->
+        <!--                  </executions>-->
+        <!--                </plugin>-->
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${org.apache.maven.plugins.maven-site-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.maven.doxia</groupId>
+              <artifactId>doxia-site-renderer</artifactId>
+              <version>${org.apache.maven.doxia.doxia-site-renderer.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
       </plugins>
     </pluginManagement>
+    <!-- We declare all plugin details in pluginManagement so we only have to refrence the plugin below. This helps with inheritance. -->
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
+
+
+  <reporting>
+    <excludeDefaults>true</excludeDefaults>
+    <outputDirectory>${project.build.directory}/site</outputDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.5.1</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.9</version>
+        <configuration>
+          <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>index</report>
+              <report>license</report>
+              <report>dependencies</report>
+              <report>scm</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>${spotbugs.plugun.version}</version>
+        <configuration>
+          <skip>${spotbugs.skip}</skip>
+          <effort>Max</effort>
+          <threshold>Low</threshold>
+          <failOnError>false</failOnError>
+          <includeFilterFile>${spotbugs.plugin.include.filter.path}</includeFilterFile>
+          <excludeFilterFile>${spotbugs.plugin.exclude.filter.path}</excludeFilterFile>
+          <plugins>
+            <plugin>
+              <groupId>com.h3xstream.findsecbugs</groupId>
+              <artifactId>findsecbugs-plugin</artifactId>
+              <version>LATEST</version> <!-- Auto-update to the latest stable -->
+            </plugin>
+          </plugins>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <configLocation>${maven-checkstyle-plugin.configLocation}</configLocation>
+          <encoding>UTF-8</encoding>
+          <logViolationsToConsole>true</logViolationsToConsole>
+          <failOnViolation>${maven-checkstyle-plugin.failOnViolation}</failOnViolation>
+          <linkXRef>false</linkXRef>
+          <includeTestSourceDirectory>false</includeTestSourceDirectory>
+          <dependencies>
+            <dependency>
+              <groupId>com.puppycrawl.tools</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>${checkstyle.version}</version>
+            </dependency>
+          </dependencies>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.6</version>
+        <configuration>
+          <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+          <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+        </configuration>
+      </plugin>
+      <!-- ################################################################################################### -->
+      <!-- We have to have JavaDocs! -->
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <failOnError>false</failOnError>
+          <show>package</show>
+          <version>true</version>
+          <release>11</release>
+          <sourcepath>${delombok.output}</sourcepath>
+          <detectOfflineLinks>false</detectOfflineLinks>
+          <detectLinks>false</detectLinks>
+          <reportSets>
+            <reportSet>
+              <!-- will not execute javadoc twice -->
+              <reports>
+                <report>javadoc-no-fork</report>
+              </reports>
+            </reportSet>
+          </reportSets>
+          <source>${delombok.output}</source>
+          <code>javadoc:aggregate</code>
+          <!-- Common tags for inlining todo notes and pre/post conditions -->
+          <tags>
+            <tag>
+              <name>todo</name>
+              <placement>amc</placement>
+              <head>To Do:</head>
+            </tag>
+            <tag>
+              <name>pre</name>
+              <placement>a</placement>
+              <head>Pre-conditions:</head>
+            </tag>
+            <tag>
+              <name>post</name>
+              <placement>mc</placement>
+              <head>Post-conditions:</head>
+            </tag>
+          </tags>
+        </configuration>
+      </plugin>
+      <!--
+      TODO: Add in the pmd reports but figure out how to exclude generated code as there is a lot of
+      inline repetition thats is fine in generated code but flips PMD out because it looks like engineers copying
+      and pasting.
+      -->
+    </plugins>
+  </reporting>
+
 
 </project>

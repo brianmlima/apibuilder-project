@@ -8,6 +8,28 @@ SOURCE_DIR="$( cd -P "$( dirname "${SOURCE}" )" && pwd )"
 ################################################################################
 
 
-${SOURCE_DIR}/bin/apibuilderproject.rb -o bml -a test-service-api -v 0.0.1-dev -t ~/.github-api-token -d ./target/ -c -L
+
+TEST_PROJECT_HOME="${SOURCE_DIR}/../tmp/bml.api.apibuilder-project-test"
+
+ORG="bml"
+GROUP_ID="org.bml"
+APP="apibuilder-project-test"
+VERSION="0.0.1"
+
+rm -rf ${TEST_PROJECT_HOME} &&
+
+${SOURCE_DIR}/bin/apibuilderproject.rb -o ${ORG} -a ${APP} -v ${VERSION} -d $(dirname ${TEST_PROJECT_HOME})  -L --spring-maven --group-id ${GROUP_ID}
+
+if [ ${?} -eq 0 ]; then
+    pushd ${TEST_PROJECT_HOME}
+      if [ ${?} -eq 0 ]; then
+        ./bin/pushAndGenerate.sh
+        if [ ${?} -eq 0 ]; then
+          mvn clean verify site
+        fi
+      fi
+    popd
+fi
+
 
 ###############################################################################

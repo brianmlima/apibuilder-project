@@ -130,7 +130,10 @@ ApibuilderProject::ReadMe.write(
 )
 
 if (appConfig.add_spring_maven)
-  ApibuilderProject::JavaSpring.build(appConfig)
+
+  java_spring = ApibuilderProject::JavaSpring.new(appConfig)
+
+  java_spring.build
 end
 
 ApibuilderProject::StaticFiles.copyFiles(:project_base_dir => appConfig.project_base_dir)

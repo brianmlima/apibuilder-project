@@ -1,0 +1,24 @@
+package <%= package %>;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+/**
+ * The main spring application class for the <%= application %> service.
+ */
+@SpringBootApplication
+@EnableScheduling
+@Slf4j
+@ComponentScan(basePackages = {"<%= package %>"})
+@SuppressWarnings("checkstyle:hideutilityclassconstructor")
+public class <%= className %> {
+  public static void main(final String[] args) {
+    log.info("Starting up <%= application %> service");
+    SpringApplication.run(<%= className %>.class, args);
+  }
+}
+
+

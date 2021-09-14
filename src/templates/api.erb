@@ -1,7 +1,48 @@
 {
   "name": "<%= application %>",
-  "apidoc": {"version": "0.14.68"},
-  "enums": {},
-  "models": {},
-  "resources": {}
+  "apidoc": {
+    "version": "0.14.68"
+  },
+  "imports": [
+    {"uri": "http://api.apibuilder.io/bml/validation/0.0.1/service.json"},
+    {"uri": "http://api.apibuilder.io/bml/annotation/0.0.1/service.json"}
+  ],
+  "enums": {
+    "serviceStatus": {
+      "values": [{"name": "STARTING_UP"},{"name": "RUNNING"},{"name": "SHUTTING_DOWN"}]
+    },
+    "healthCode": {
+      "values": [{"name": "HEALTHY"},{"name": "UNHEALTHY"}]
+    }
+  },
+  "models": {
+    "version": {
+      "description": " A SemVer version.",
+      "fields": [
+        {"name": "major","type": "integer","description": "A major version number.","example": "1"},
+        {"name": "minor","type": "integer","description": "A minor version number.","example": "0"},
+        {"name": "patch","type": "integer","description": "A patch version number.","example": "0"}
+      ]
+    },
+    "healthCheck": {
+          "description": "A response model for the standard health check resource. You should standardize this for your organization and import it",
+          "fields": [
+            {"name": "version","type": "version","description": "A SemVer of this object"},
+            {"name": "health","type": "healthCode","description": "A general health status code.","example": "HEALTHY"},
+            {"name": "status","type": "serviceStatus","description": "A general service status code.","example": "RUNNING"}
+          ]
+        }
+  },
+  "resources": {
+    "healthCheck": {
+      "operations": [
+        {
+          "method": "GET",
+          "responses": {
+            "200": {"description": "Success.","type": "healthCheck"}
+          }
+        }
+      ]
+    }
+  }
 }

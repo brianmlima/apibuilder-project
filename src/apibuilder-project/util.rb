@@ -4,6 +4,18 @@ module ApibuilderProject
 
   module Util
 
+    StaticResource = Struct.new(:loc, :dest, :is_dir)
+
+    def Util.copyFiles(staticResources)
+      staticResources.each do |v|
+        if v.is_dir == true
+          FileUtils.cp_r v.loc, v.dest
+        else
+          FileUtils.cp v.loc, v.dest
+        end
+      end
+    end
+
     def Util.file_join(*args)
       args.select! { |s| s.to_s.strip != "" }
       File.join(*args)
@@ -29,7 +41,6 @@ module ApibuilderProject
         FileUtils.mkdir_p target_directory
       end
     end
-
 
     # Returns the trimmed value if not empty. If empty (or nil) returns nil
     def Util.read_non_empty_string(value)
@@ -60,7 +71,6 @@ module ApibuilderProject
         "XXX-XXXX-XXXX"
       end
     end
-
 
     def Util.absolute_path(path)
       File.absolute_path(File.expand_path(path))
