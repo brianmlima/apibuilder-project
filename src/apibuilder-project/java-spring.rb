@@ -6,31 +6,15 @@ require 'fileutils'
 
 module ApibuilderProject
 
-  class SpringPom
-    TEMPLATE_FILE_NAME = "spring-pom.xml.erb"
-    TEMPLATE_CONTENT = IO.read(File.absolute_path(File.expand_path("#{File.dirname(__FILE__)}/../templates/#{TEMPLATE_FILE_NAME}")))
-    OUTPUT_FILE_NAME = "pom.xml"
-
-    def SpringPom.write(config)
-      Preconditions.assert_class(config, ApibuilderProject::AppConfig)
-      groupId = config.group_id
-      file_out = File.absolute_path(File.expand_path("#{config.project_base_dir}/#{OUTPUT_FILE_NAME}"))
-      message = ERB.new(TEMPLATE_CONTENT, 0, "%<>")
-      content = message.result(binding)
-      IO.write(file_out, content)
-    end
-  end
-
-  # class SpringApplicationClass
-  #   TEMPLATE_FILE_NAME = "spring-application-class.java.erb"
+  # class SpringPom
+  #   TEMPLATE_FILE_NAME = "spring-pom.xml.erb"
   #   TEMPLATE_CONTENT = IO.read(File.absolute_path(File.expand_path("#{File.dirname(__FILE__)}/../templates/#{TEMPLATE_FILE_NAME}")))
-  #   # OUTPUT_FILE_NAME = "pom.xml"
+  #   OUTPUT_FILE_NAME = "pom.xml"
+  #
   #   def SpringPom.write(config)
-  #     Preconditions.assert_class(config, ApibuilderProject::JavaSpringConfig)
+  #     Preconditions.assert_class(config, ApibuilderProject::AppConfig)
   #     groupId = config.group_id
-  #     package = config.
-  #       className = config.application.split(/[\.]/).collect(&:capitalize).join
-  #     file_out = File.absolute_path(File.expand_path("#{config.project_base_dir}/#{TEMPLATE_FILE_NAME}"))
+  #     file_out = File.absolute_path(File.expand_path("#{config.project_base_dir}/#{OUTPUT_FILE_NAME}"))
   #     message = ERB.new(TEMPLATE_CONTENT, 0, "%<>")
   #     content = message.result(binding)
   #     IO.write(file_out, content)
@@ -54,7 +38,7 @@ module ApibuilderProject
 
     def initialize(appConfig)
 
-      @project_base = appConfig.project_base_dir
+      @project_base = Util.absolute_path(appConfig.project_base_dir)
       project_package_paths = "#{appConfig.project_package.split(/[\.]/).join("/")}"
       @generated_base = "#{@project_base}/generated"
       @src_base = "#{@project_base}/src"
@@ -74,7 +58,7 @@ module ApibuilderProject
     end
   end
 
-  class JavaSpringConfig
+  class JavaConfig
 
     attr_reader :app_config,
                 :group_id,
@@ -89,11 +73,23 @@ module ApibuilderProject
 
   class JavaSpring
     attr_reader :config,
-                :dirs
+                :dirs,
+                :projectBaseDir,
+                :templateHome,
+                :gradleTemplateHome,
+                :mavenTemplateHome,
+                :maven,
+                :gradle
 
     def initialize(appConfig)
-      @config = ApibuilderProject::JavaSpringConfig.new(appConfig)
+      @config = ApibuilderProject::JavaConfig.new(appConfig)
       @dirs = ApibuilderProject::JavaSourceDirs.new(appConfig)
+      @templateHome = Util.absolute_path("#{File.dirname(__FILE__)}/../templates")
+      @gradleTemplateHome = "#{@templateHome}/java/gradle"
+      @mavenTemplateHome = "#{@templateHome}/java/maven"
+      @projectBaseDir = Util.absolute_path(@config.app_config.project_base_dir)
+      @maven = @config.app_config.add_spring_maven
+      @gradle = @config.app_config.add_spring_gradle
     end
 
     def build()
@@ -112,67 +108,127 @@ module ApibuilderProject
     def writeTemplates()
       copyStaticFiles()
       applicationClass()
-      springPom()
+      if (@maven)
+        springPom()
+      end
+      if (@gradle)
+        gradleProperties()
+        gradleBuild()
+      end
+
       lombokConfig()
     end
 
     def copyStaticFiles()
-      project_base_dir = @config.app_config.project_base_dir
-      staticResources = [
-        StaticResource.new(
-          Util.absolute_path("#{File.dirname(__FILE__)}/../templates/conf"),
-          Util.absolute_path("#{project_base_dir}"),
-          true),
-        StaticResource.new(
-          Util.absolute_path("#{File.dirname(__FILE__)}/../templates/.mvn"),
-          Util.absolute_path("#{project_base_dir}"),
-          true),
-        StaticResource.new(
-          Util.absolute_path("#{File.dirname(__FILE__)}/../templates/java/mvnw.cmd"),
-          Util.absolute_path("#{project_base_dir}"),
-          false),
-        StaticResource.new(
-          Util.absolute_path("#{File.dirname(__FILE__)}/../templates/java/mvnw"),
-          Util.absolute_path("#{project_base_dir}"),
-          false)
-      ]
-      Util.copyFiles(staticResources)
+      # Files that all configs use
+      Util.copyFiles(
+        [
+          StaticResource.new(
+            "#{templateHome}/conf",
+            @projectBaseDir,
+            true)
+        ]
+      )
+      # Maven specific files
+      if (@maven)
+        Util.copyFiles(
+          [
+            StaticResource.new(
+              "#{mavenTemplateHome}/wrapper/.mvn",
+              @projectBaseDir,
+              true),
+            StaticResource.new(
+              "#{mavenTemplateHome}/wrapper/mvnw.cmd",
+              @projectBaseDir,
+              false),
+            StaticResource.new(
+              "#{mavenTemplateHome}/wrapper/mvnw",
+              @projectBaseDir,
+              false)
+          ]
+        )
+      end
+
+      #Gradle specific files
+      if (@gradle)
+        Util.copyFiles(
+          [
+            StaticResource.new(
+              "#{@gradleTemplateHome}/wrapper/gradle",
+              @projectBaseDir,
+              true),
+            StaticResource.new(
+              "#{@gradleTemplateHome}/wrapper/gradlew",
+              @projectBaseDir,
+              false),
+            StaticResource.new(
+              "#{@gradleTemplateHome}/wrapper/gradlew.bat",
+              @projectBaseDir,
+              false)
+          ]
+        )
+      end
     end
 
     def applicationClass()
       templateFileName = "spring-application-class.java.erb"
-      templateContent = IO.read(File.absolute_path(File.expand_path("#{File.dirname(__FILE__)}/../templates/#{templateFileName}")))
+      #Template variables
       application = @config.app_config.application
       groupId = @config.group_id
       package = @config.project_package
+      # Write templated content
       className = @config.app_config.application.split(/[\-\_\.]/).collect(&:capitalize).join()
-      file_out = File.absolute_path(File.expand_path("#{@dirs.src_main_java_project_package}/#{className}.java"))
-      message = ERB.new(templateContent, 0, "%<>")
-      content = message.result(binding)
-      IO.write(file_out, content)
+      message = ERB.new(IO.read("#{@templateHome}/#{templateFileName}"), 0, "%<>")
+      IO.write(
+        "#{@dirs.src_main_java_project_package}/#{className}.java",
+        message.result(binding)
+      )
     end
 
     def springPom()
       templateFileName = "spring-pom.xml.erb"
-      templateContent = IO.read(File.absolute_path(File.expand_path("#{File.dirname(__FILE__)}/../templates/#{templateFileName}")))
+      # Template variables
       groupId = @config.group_id
       artifactId = @config.app_config.application
       package = @config.project_package
       version = @config.app_config.version
       mainClassName = @config.app_config.application.split(/[\-\_\.]/).collect(&:capitalize).join()
-      file_out = File.absolute_path(File.expand_path("#{@dirs.project_base}/pom.xml"))
-      message = ERB.new(templateContent, 0, "%<>")
-      content = message.result(binding)
-      IO.write(file_out, content)
+      # Write templated content
+      IO.write(
+        "#{@dirs.project_base}/pom.xml",
+        ERB.new(IO.read("#{@templateHome}/#{templateFileName}"), 0, "%<>").result(binding)
+      )
     end
 
     def lombokConfig()
       templateFileName = "lombok.config.erb"
-      templateContent = IO.read(File.absolute_path(File.expand_path("#{File.dirname(__FILE__)}/../templates/#{templateFileName}")))
-      file_out = File.absolute_path(File.expand_path("#{@dirs.project_base}/lombok.config"))
-      message = ERB.new(templateContent, 0, "%<>")
-      content = message.result(binding)
-      IO.write(file_out, content)
+      # Template variables
+      # Write templated content
+      IO.write(
+        "#{@dirs.project_base}/#{templateFileName.delete_suffix(".erb")}",
+        ERB.new(IO.read("#{@templateHome}/#{templateFileName}"), 0, "%<>").result(binding)
+      )
+    end
+
+    def gradleProperties()
+      templateFileName = "settings.gradle.erb"
+      # Template variables
+      rootApplicationName = @config.app_config.application.split(/[\-\_\.]/).collect(&:capitalize).join(" ")
+      # Write templated content
+      IO.write(
+        "#{@dirs.project_base}/#{templateFileName.delete_suffix(".erb")}",
+        ERB.new(IO.read("#{@gradleTemplateHome}/#{templateFileName}"), 0, "%<>").result(binding)
+      )
+    end
+
+    def gradleBuild()
+      templateFileName = "build.gradle.erb"
+      # Template variables
+      # Write templated content
+      IO.write(
+        "#{@dirs.project_base}/#{templateFileName.delete_suffix(".erb")}",
+        ERB.new(IO.read("#{@gradleTemplateHome}/#{templateFileName}"), 0, "%<>").result(binding)
+      )
     end
 
   end

@@ -1,0 +1,116 @@
+plugins {
+  id 'java'
+  id 'org.springframework.boot' version '2.5.5'
+  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'jacoco'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+ext {
+  set('platformArchetype', "java-spring-service")
+  set('springCloudVersion', "2020.0.4")
+  set('testcontainersVersion', "1.16.0")
+  set('junitVersion',"5.2.0")
+  set('lombokVersion',"1.18.22")
+  set('fakerVersion',"1.0.2")
+  set('loremVersion',"2.1")
+  set('commonsTextVersion',"1.9")
+}
+
+repositories {
+  mavenCentral()
+}
+
+configurations {
+  compileOnly {
+    extendsFrom annotationProcessor
+  }
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs 'src/main/java'
+      srcDirs 'generated/src/main/java'
+    }
+    resources {
+      srcDirs 'src/main/resources'
+      srcDirs 'generated/src/main/resources'
+    }
+  }
+  test {
+    java {
+      srcDirs 'src/test/java'
+      srcDirs 'generated/src/test/java'
+    }
+    resources {
+      srcDirs 'src/test/resources'
+      srcDirs 'generated/src/test/resources'
+    }
+  }
+}
+
+dependencyManagement {
+  imports {
+    mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
+    mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    mavenBom "org.junit:junit-bom:${junitVersion}"
+  }
+}
+
+dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-actuator'
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'org.springframework.boot:spring-boot-starter-integration'
+  implementation 'org.springframework.boot:spring-boot-starter-security'
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-webflux'
+  implementation 'org.flywaydb:flyway-core'
+  implementation 'org.springframework.cloud:spring-cloud-starter'
+  implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
+  implementation 'org.springframework.cloud:spring-cloud-stream'
+  implementation 'org.springframework.integration:spring-integration-http'
+  implementation 'org.springframework.integration:spring-integration-jpa'
+  implementation 'org.springframework.integration:spring-integration-security'
+  implementation 'org.springframework.integration:spring-integration-webflux'
+  implementation "org.apache.commons:commons-text:${commonsTextVersion}"
+  compileOnly 'org.projectlombok:lombok'
+  runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+  runtimeOnly 'org.postgresql:postgresql'
+  annotationProcessor 'org.projectlombok:lombok'
+
+  testAnnotationProcessor 'org.projectlombok:lombok'
+  testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'io.projectreactor:reactor-test'
+  testImplementation 'org.springframework.integration:spring-integration-test'
+  testImplementation 'org.springframework.security:spring-security-test'
+  testImplementation 'org.testcontainers:junit-jupiter'
+  testImplementation 'org.testcontainers:postgresql'
+  testImplementation "com.github.javafaker:javafaker:${fakerVersion}"
+  testImplementation "com.thedeanda:lorem:${loremVersion}"
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+/*
+ * Set the minimum test code coverage and enforce it using Jacoco.
+ */
+jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      limit {
+        minimum = 0.9
+      }
+    }
+  }
+}
+
+test {
+  useJUnitPlatform()
+}

@@ -27,13 +27,23 @@ module ApibuilderProject
     CONFIG_DIR_NAME = ".apibuilder"
     CONFIG_FILE_NAME = "config"
 
-    def GeneratorConfig.write(script_name:, organization:, application:, version:, force:, clean:, project_base_dir:)
+    def GeneratorConfig.write(script_name:, appConfig:)
       script_name = File.basename(script_name)
+      organization = appConfig.organization
+      application = appConfig.application
+      version = appConfig.version
+      force = appConfig.force
+      clean = appConfig.clean
+      project_base_dir = appConfig.project_base_dir
+      add_spring_maven = appConfig.add_spring_maven
+
       conf_dir = File.absolute_path(File.expand_path("#{project_base_dir}/#{CONFIG_DIR_NAME}"))
       conf_file = File.absolute_path(File.expand_path("#{conf_dir}/#{CONFIG_FILE_NAME}"))
+
       if !Dir.exist?(conf_dir)
         FileUtils.mkdir_p conf_dir
       end
+
       message = ERB.new(TEMPLATE_CONTENT, 0, "%<>")
       # content = message.result(self.get_binding)
       content = message.result(binding)

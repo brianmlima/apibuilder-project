@@ -18,14 +18,17 @@ VERSION="0.0.1"
 
 rm -rf ${TEST_PROJECT_HOME} &&
 
-${SOURCE_DIR}/bin/apibuilderproject.rb -o ${ORG} -a ${APP} -v ${VERSION} -d $(dirname ${TEST_PROJECT_HOME})  -L --spring-maven --group-id ${GROUP_ID}
+${SOURCE_DIR}/bin/apibuilderproject.rb -o ${ORG} -a ${APP} -v ${VERSION} -d $(dirname ${TEST_PROJECT_HOME})  -L --spring-gradle --group-id ${GROUP_ID}
 
 if [ ${?} -eq 0 ]; then
     pushd ${TEST_PROJECT_HOME}
       if [ ${?} -eq 0 ]; then
         ./bin/pushAndGenerate.sh
         if [ ${?} -eq 0 ]; then
-          mvn clean verify site
+          ls -lha
+          find ./src -type f
+          #mvn clean verify site
+          ./gradlew clean test
         fi
       fi
     popd

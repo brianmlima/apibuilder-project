@@ -19,6 +19,7 @@ module ApibuilderProject
                 :debug,
                 :local_only,
                 :add_spring_maven,
+                :add_spring_gradle,
                 :group_id,
                 :project_package
 
@@ -50,12 +51,14 @@ module ApibuilderProject
       local_only_opt = SwitchSpec.new("-L", "--local-only", "if set I will not check apibuilder.io or github to check for existing conflicting projects. I will also not create a new apibuilder porject or github repository")
       add_spring_maven_opt = SwitchSpec.new("-M", "--spring-maven", "if set I will add in a working pom.xml and a generic src directory tree for building this project using maven and spring")
       group_id_opt = OptionSpec.new("-g", "--group-id GROUPID", String, "The group id used for build configurations. IE Maven or Gradle. Required when using switches that enable build template generation.")
+      add_spring_gradle_opt = SwitchSpec.new("-G", "--spring-gradle", "if set I will add in a working gradlew, gradle build, and a generic src directory tree for building this project using gradle and spring")
 
       @force = false
       @clean = false
       @debug = false
       @local_only = false
       @github_token_file = nil
+      @add_spring_maven = false
       @add_spring_maven = false
       @group_id = nil
 
@@ -109,6 +112,10 @@ module ApibuilderProject
         opts.on(add_spring_maven_opt.short, add_spring_maven_opt.long, add_spring_maven_opt.description) do |v|
           @add_spring_maven = true
         end
+        ## All the build system template configs.
+        opts.on(add_spring_gradle_opt.short, add_spring_gradle_opt.long, add_spring_gradle_opt.description) do |v|
+          @add_spring_gradle = true;
+        end
         opts.on(group_id_opt.short, group_id_opt.long, group_id_opt.type, group_id_opt.description) do |v|
           @group_id = v
         end
@@ -143,7 +150,7 @@ module ApibuilderProject
         @apibuilder_token = ApibuilderCli::Util.read_non_empty_string(ENV['APIBUILDER_TOKEN']) || ApibuilderCli::Util.read_non_empty_string(ENV['APIDOC_TOKEN'])
       end
 
-      if (@add_spring_maven) # We are going to template out a spring maven build system
+      if (@add_spring_maven || @add_spring_gradle) # We are going to template out a spring maven build system
         if (@local_only == false && @group_id == nil)
           #Try and use the apibuilder client to get the organizations namespace.
           logAndFail(optionParser, "You must pass a group_id if attempting to use build templates. In the future if not in local only mode I will use the organizations namespace as the group id.") if (@group_id == nil)
@@ -153,6 +160,10 @@ module ApibuilderProject
         # puts(@project_package)
 
         logAndFail(optionParser, "You must pass a group_id if attempting to use build templates and in local only mode. If not in local only mode I will use the organizations namespace as the group id.") if (@group_id == nil)
+      end
+
+      if (@add_spring_maven && @add_spring_gradle)
+        logAndFail(optionParser, "The --spring-maven and --spring-gradle switch arguments are mutually exclusive. Pick one")
       end
 
     end

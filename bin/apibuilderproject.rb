@@ -69,7 +69,6 @@ end
 
 ScaryPaths::PathChecks.failOnScaryPath(appConfig.target_directory, appConfig.project_base_dir)
 
-
 # if the target dir does not exist create it if force is set otherwise exit
 target_directory = appConfig.target_directory
 if !Dir.exist?(target_directory)
@@ -95,44 +94,36 @@ else
 end
 
 ApibuilderProject::GeneratorConfig.write(
-    script_name: __FILE__,
-    organization: appConfig.organization,
-    application: appConfig.application,
-    version: appConfig.version,
-    force: appConfig.force,
-    clean: appConfig.clean,
-    project_base_dir: appConfig.project_base_dir
+  script_name: __FILE__,
+  appConfig: appConfig
 )
 
 ApibuilderProject::ApiJson.write(
-    application: appConfig.application,
-    project_base_dir: appConfig.project_base_dir
+  application: appConfig.application,
+  project_base_dir: appConfig.project_base_dir
 )
 
-
 ApibuilderProject::ProjectConfig.write(
-    organization: appConfig.organization,
-    application: appConfig.application,
-    version: appConfig.version,
-    project_base_dir: appConfig.project_base_dir
+  organization: appConfig.organization,
+  application: appConfig.application,
+  version: appConfig.version,
+  project_base_dir: appConfig.project_base_dir
 )
 
 ApibuilderProject::GitIgnore.write(
-    :project_base_dir => appConfig.project_base_dir,
-    :lines => ApibuilderProject::GitIgnore.default_lines
+  :project_base_dir => appConfig.project_base_dir,
+  :lines => ApibuilderProject::GitIgnore.default_lines
 )
 
 ApibuilderProject::ReadMe.write(
-    organization: appConfig.organization,
-    application: appConfig.application,
-    version: appConfig.version,
-    project_base_dir: appConfig.project_base_dir
+  organization: appConfig.organization,
+  application: appConfig.application,
+  version: appConfig.version,
+  project_base_dir: appConfig.project_base_dir
 )
 
-if (appConfig.add_spring_maven)
-
+if (appConfig.add_spring_maven || appConfig.add_spring_gradle)
   java_spring = ApibuilderProject::JavaSpring.new(appConfig)
-
   java_spring.build
 end
 

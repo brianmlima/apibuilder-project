@@ -8,9 +8,25 @@ code:
       generators:
         openapi:
           target: generated/src/main/resources/static/<%= application %>
-  <% if organization != "bml" %>
+<% if add_spring_maven %>
+        bml_lombok:
+          target: generated/src/main/java
+        spring_service:
+          target: generated/src/main/java
+        spring_service_testing:
+          target: generated/src/test/java
+        jpa_repository:
+          target: generated/src/main/java
+        bml_lombok_test:
+          target: generated/src/test/java
+        java_client:
+          target: generated/src/test/java
+        postman_collection_2_1:
+          target: generated/src/main/resources
+<% end %>
+<% if organization != "bml" %>
   bml:
-  <% end %>
+<% end %>
     validation:
       version: 0.0.1
       generators:
